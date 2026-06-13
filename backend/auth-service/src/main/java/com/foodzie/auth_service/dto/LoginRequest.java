@@ -1,0 +1,15 @@
+package com.foodzie.auth_service.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class LoginRequest {
+
+    /** Accepts either email or username */
+    @NotBlank(message = "Email or username is required")
+    private String emailOrUsername;
+
+    @NotBlank(message = "Password is required")
+    private String password;
+}

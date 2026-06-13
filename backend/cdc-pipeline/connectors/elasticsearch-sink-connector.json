@@ -1,0 +1,35 @@
+{
+  "name": "foodzie-elasticsearch-sink",
+  "config": {
+    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+
+    "topics": "restaurant-search-composed",
+
+    "connection.url": "http://elasticsearch:9200",
+
+    "type.name": "_doc",
+
+    "key.ignore": "false",
+    "schema.ignore": "true",
+
+    "document.id.strategy": "io.confluent.connect.elasticsearch.mapped.MappedRecordConverter",
+    "document.id.strategy.field.name": "restaurant_id",
+
+    "behavior.on.null.values": "delete",
+    "behavior.on.malformed.documents": "warn",
+
+    "write.method": "upsert",
+
+    "batch.size": "100",
+    "max.in.flight.requests": "5",
+    "linger.ms": "100",
+
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+
+    "errors.tolerance": "all",
+    "errors.log.enable": "true",
+    "errors.log.include.messages": "true"
+  }
+}

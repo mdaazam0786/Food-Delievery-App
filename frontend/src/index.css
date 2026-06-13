@@ -1,0 +1,37 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: #f8f9fb;
+  color: #1E2229;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button  { font-family: inherit; cursor: pointer; border: none; background: none; }
+input   { font-family: inherit; }
+a       { text-decoration: none; color: inherit; }
+
+/* ── Shared layout tokens ── */
+:root {
+  --content-max:   1280px;   /* max page width */
+  --content-pad:   clamp(16px, 4vw, 48px); /* responsive side padding */
+  --radius-card:   18px;
+  --radius-pill:   50px;
+  --orange:        #FF7622;
+  --navy:          #1E2229;
+  --muted:         #9EA1B1;
+  --surface:       #F7F8FC;
+  --border:        #ECEEF4;
+}

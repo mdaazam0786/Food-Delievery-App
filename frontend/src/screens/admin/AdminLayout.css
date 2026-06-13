@@ -1,0 +1,405 @@
+/* ─────────────────────────────────────────────────────────────
+   Admin Panel — Shell Layout
+   Sidebar: deep dark navy #121223
+   Accent:  vibrant orange #FF7622
+───────────────────────────────────────────────────────────── */
+
+/* ── Shell ── */
+.adm-shell {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #f0f2f8;
+}
+
+/* ── Sidebar ── */
+.adm-sidebar {
+  width: 240px;
+  min-width: 240px;
+  height: 100vh;
+  background-color: #121223;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  overflow: hidden;
+}
+
+/* Logo area */
+.adm-sidebar__logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 24px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.adm-sidebar__logo-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #FF9A3C 0%, #FF7622 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(255,118,34,0.35);
+}
+
+.adm-sidebar__logo-text {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+}
+
+/* Nav */
+.adm-sidebar__nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 20px 12px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.adm-sidebar__nav::-webkit-scrollbar { display: none; }
+
+/* Nav item */
+.adm-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.15s ease;
+  overflow: hidden;
+}
+
+.adm-nav-item:hover:not(.adm-nav-item--active) {
+  background-color: rgba(255,255,255,0.05);
+}
+
+.adm-nav-item--active {
+  background-color: rgba(255,118,34,0.12);
+}
+
+/* Left orange indicator bar */
+.adm-nav-item__bar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background-color: #FF7622;
+  border-radius: 0 3px 3px 0;
+  transition: height 0.2s ease;
+}
+.adm-nav-item--active .adm-nav-item__bar {
+  height: 60%;
+}
+
+.adm-nav-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  flex-shrink: 0;
+}
+
+.adm-nav-item__label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #8B8FA8;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+.adm-nav-item--active .adm-nav-item__label {
+  color: #ffffff;
+}
+
+/* Sidebar footer */
+.adm-sidebar__footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.adm-sidebar__version {
+  font-size: 11px;
+  color: rgba(255,255,255,0.2);
+  font-weight: 500;
+}
+
+/* ── Main area ── */
+.adm-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ── Top header bar ── */
+.adm-topbar {
+  height: 68px;
+  min-height: 68px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ECEEF4;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 28px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  z-index: 100;
+  position: relative;
+}
+
+.adm-topbar__left {
+  flex-shrink: 0;
+}
+
+.adm-topbar__greeting {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E2229;
+  white-space: nowrap;
+}
+
+.adm-topbar__center {
+  flex: 1;
+  max-width: 480px;
+}
+
+.adm-topbar__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #F7F8FC;
+  border: 1.5px solid #ECEEF4;
+  border-radius: 50px;
+  padding: 0 18px;
+  height: 42px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.adm-topbar__search:focus-within {
+  border-color: #FF7622;
+  box-shadow: 0 0 0 3px rgba(255,118,34,0.10);
+}
+
+.adm-topbar__search-input {
+  flex: 1;
+  font-size: 13.5px;
+  color: #1E2229;
+  background: transparent;
+  border: none;
+  outline: none;
+  min-width: 0;
+}
+.adm-topbar__search-input::placeholder { color: #B0B7C3; }
+.adm-topbar__search-input::-webkit-search-cancel-button { display: none; }
+
+.adm-topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.adm-topbar__icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid #ECEEF4;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease;
+}
+.adm-topbar__icon-btn:hover { border-color: #FF7622; }
+
+.adm-topbar__notif-dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #FF7622;
+  border: 2px solid #ffffff;
+}
+
+/* Profile dropdown */
+.adm-profile {
+  position: relative;
+}
+
+.adm-profile__trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 50px;
+  border: 1.5px solid #ECEEF4;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.adm-profile__trigger:hover {
+  border-color: #FF7622;
+  box-shadow: 0 0 0 3px rgba(255,118,34,0.08);
+}
+
+.adm-profile__info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.adm-profile__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1E2229;
+  white-space: nowrap;
+}
+
+.adm-profile__role {
+  font-size: 11px;
+  font-weight: 500;
+  color: #9EA1B1;
+  white-space: nowrap;
+}
+
+.adm-profile__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 160px;
+  background: #ffffff;
+  border: 1px solid #ECEEF4;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  padding: 6px;
+  z-index: 300;
+  animation: adm-dropdown-in 0.15s ease;
+}
+
+@keyframes adm-dropdown-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.adm-profile__menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1E2229;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+.adm-profile__menu-item:hover { background-color: #F7F8FC; }
+.adm-profile__menu-item--danger { color: #E53935; }
+.adm-profile__menu-item--danger:hover { background-color: #FFF5F5; }
+
+.adm-profile__divider {
+  height: 1px;
+  background-color: #ECEEF4;
+  margin: 4px 0;
+}
+
+/* ── Page content area ── */
+.adm-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px;
+  scrollbar-width: thin;
+  scrollbar-color: #ECEEF4 transparent;
+}
+.adm-content::-webkit-scrollbar { width: 6px; }
+.adm-content::-webkit-scrollbar-track { background: transparent; }
+.adm-content::-webkit-scrollbar-thumb { background-color: #ECEEF4; border-radius: 3px; }
+
+/* ── Sign-out menu item ── */
+.adm-profile__menu-item--signout {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #E53935;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+.adm-profile__menu-item--signout:hover:not(:disabled) {
+  background-color: #FFF5F5;
+}
+.adm-profile__menu-item--signout:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Profile avatar wrapper ── */
+.adm-profile__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Skeleton loading placeholders ── */
+@keyframes adm-shimmer {
+  0%   { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.adm-skeleton {
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    #F0F2F8 25%,
+    #E4E7F0 50%,
+    #F0F2F8 75%
+  );
+  background-size: 200px 100%;
+  animation: adm-shimmer 1.4s ease-in-out infinite;
+}
+
+.adm-skeleton--name {
+  width: 96px;
+  height: 12px;
+}
+
+.adm-skeleton--role {
+  width: 68px;
+  height: 10px;
+  margin-top: 2px;
+}

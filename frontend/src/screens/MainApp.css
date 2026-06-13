@@ -1,0 +1,54 @@
+.main-app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #fff5f2;
+}
+
+.main-app__card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 48px 40px;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+  max-width: 400px;
+  width: 90%;
+}
+
+.main-app__emoji {
+  font-size: 56px;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.main-app__title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #272d2f;
+  margin-bottom: 12px;
+}
+
+.main-app__subtitle {
+  font-size: 14px;
+  color: #9ea1b1;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.main-app__logout-btn {
+  background-color: #fe724c;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 14px 40px;
+  border-radius: 28px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.main-app__logout-btn:hover {
+  opacity: 0.88;
+}

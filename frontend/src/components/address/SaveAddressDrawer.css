@@ -1,0 +1,408 @@
+/* ─────────────────────────────────────────────────────────
+   Save Address Drawer — Right-side sliding modal
+───────────────────────────────────────────────────────── */
+
+.save-address-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 18, 35, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  animation: save-address-overlay-in 0.2s ease;
+}
+
+@keyframes save-address-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.save-address-drawer {
+  width: 100%;
+  max-width: 500px;
+  height: 100vh;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.14);
+  animation: save-address-drawer-in 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes save-address-drawer-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.save-address-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid #eceef4;
+  background: #ffffff;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+.save-address-close:hover {
+  background: #f7f8fc;
+  border-color: #d0d5dd;
+  color: #1e2229;
+}
+
+/* ── Map Section (40%) ── */
+.save-address-map-container {
+  flex: 0 0 40%;
+  position: relative;
+  overflow: hidden;
+  background: #f0f2f8;
+  border-bottom: 1px solid #eceef4;
+}
+
+/* Map Picker Section — uses MapLocationPicker component */
+.save-address-map-section {
+  flex: 0 0 50%;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid #eceef4;
+}
+
+.save-address-map-section .map-picker {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.save-address-map-section .map-picker__frame {
+  flex: 1;
+}
+
+.save-address-map {
+  width: 100%;
+  height: 100%;
+}
+
+.save-address-map-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f0f2f8 0%, #e9ebf3 100%);
+  color: #9ea1b1;
+  font-size: 14px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.save-address-map-center-marker {
+  font-size: 48px;
+  opacity: 0.6;
+}
+
+.save-address-map-instruction {
+  font-size: 13px;
+  color: #9ea1b1;
+  margin: 0;
+  text-align: center;
+  max-width: 80%;
+}
+
+.save-address-map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #f0f2f8;
+  color: #9ea1b1;
+  font-size: 14px;
+}
+
+/* Address Overlay Banner */
+.save-address-overlay-banner {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  animation: save-address-banner-in 0.3s ease;
+}
+
+@keyframes save-address-banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.save-address-overlay-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e2229;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Form Section (60%) ── */
+.save-address-form {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  scrollbar-width: thin;
+  scrollbar-color: #eceef4 transparent;
+}
+
+.save-address-form::-webkit-scrollbar {
+  width: 4px;
+}
+
+.save-address-form::-webkit-scrollbar-thumb {
+  background: #eceef4;
+  border-radius: 2px;
+}
+
+.save-address-form-header {
+  margin-bottom: 4px;
+}
+
+.save-address-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1e2229;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.2px;
+}
+
+.save-address-subtitle {
+  font-size: 12px;
+  color: #9ea1b1;
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Loading Indicator */
+.save-address-loading {
+  padding: 12px;
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.save-address-loading p {
+  font-size: 12px;
+  color: #3b82f6;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Field */
+.save-address-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.save-address-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.save-address-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+}
+
+.save-address-req {
+  color: #dc2626;
+}
+
+.save-address-input {
+  width: 100%;
+  border: 1.5px solid #eceef4;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 13.5px;
+  color: #1e2229;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.save-address-input:focus {
+  border-color: #ff7622;
+  box-shadow: 0 0 0 3px rgba(255, 118, 34, 0.1);
+  background: #ffffff;
+}
+
+.save-address-input:disabled {
+  background: #f7f8fc;
+  color: #9ea1b1;
+  cursor: not-allowed;
+}
+
+.save-address-input::placeholder {
+  color: #b0b7c3;
+}
+
+.save-address-hint {
+  font-size: 11px;
+  color: #9ea1b1;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Label Pills */
+.save-address-label-pills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.save-address-label-pill {
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #eceef4;
+  background: #ffffff;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.save-address-label-pill:hover:not(:disabled) {
+  border-color: #ff7622;
+  background: #fff8f5;
+}
+
+.save-address-label-pill--active {
+  border-color: #ff7622;
+  background: linear-gradient(135deg, #fff8f5 0%, #ffe8db 100%);
+  color: #ff7622;
+  box-shadow: 0 0 0 3px rgba(255, 118, 34, 0.1);
+}
+
+.save-address-label-pill:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Address Display */
+.save-address-address-display {
+  width: 100%;
+  border: 1.5px solid #eceef4;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #f7f8fc;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.save-address-address-text {
+  font-size: 13px;
+  color: #1e2229;
+  margin: 0;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.save-address-address-text--empty {
+  color: #9ea1b1;
+  font-style: italic;
+}
+
+/* Buttons */
+.save-address-save-btn,
+.save-address-cancel-btn {
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.save-address-save-btn {
+  background: linear-gradient(135deg, #ff9a3c 0%, #ff7622 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(255, 118, 34, 0.3);
+}
+
+.save-address-save-btn:hover:not(:disabled) {
+  opacity: 0.92;
+  box-shadow: 0 6px 20px rgba(255, 118, 34, 0.4);
+}
+
+.save-address-save-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.save-address-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.save-address-cancel-btn {
+  background: #ffffff;
+  color: #6b7280;
+  border: 1.5px solid #eceef4;
+}
+
+.save-address-cancel-btn:hover:not(:disabled) {
+  background: #f7f8fc;
+  border-color: #d0d5dd;
+}
+
+.save-address-cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .save-address-drawer {
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    height: 85vh;
+  }
+
+  .save-address-overlay {
+    align-items: flex-end;
+  }
+
+  @keyframes save-address-drawer-in {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}

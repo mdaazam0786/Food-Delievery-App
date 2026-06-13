@@ -1,0 +1,20 @@
+package com.foodzie.restaurant_service.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/debug")
+public class DebugController {
+
+    @GetMapping
+    public ResponseEntity<?> test(Authentication authentication) {
+        System.out.println("Authentication: " + authentication);
+        System.out.println("Authorities: " + authentication.getAuthorities());
+
+        return ResponseEntity.ok(authentication.getAuthorities());
+    }
+}

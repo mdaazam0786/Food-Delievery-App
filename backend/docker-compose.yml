@@ -1,0 +1,221 @@
+version: '3.8'
+
+services:
+  # --- SERVICE REGISTRY (Eureka) ---
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_APPLICATION_NAME=eureka-server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- RELATIONAL DATABASES (MySQL) ---
+  mysql-auth:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: foodzie
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+
+  mysql-order:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: foodzie
+    ports:
+      - "3307:3306"
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Driver DB — source of truth for delivery partner profiles (slow-moving data)
+  # Real-time location lives in Redis, not here.
+  mysql-driver:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: driverdb
+    ports:
+      - "3309:3306"
+    command: --default-authentication-plugin=mysql_native_password
+
+  # --- DOCUMENT DATABASE (MongoDB for Menu/Catalog) ---
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  # --- CACHE (Redis for Recommendations/Feed) ---
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    # Enable keyspace notifications so delivery-acceptance-service and
+    # restaurant-acceptance-service can detect offer/order TTL expiry.
+    command: redis-server --notify-keyspace-events Ex
+
+  # --- EVENT STREAMING (Kafka) ---
+  # Single-node KRaft version (no Zookeeper needed) to save RAM
+  kafka:
+    image: apache/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,PLAINTEXT_HOST://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # driver-location-pings needs more partitions for parallel zone processing
+      # Other topics use the default (1 partition for dev)
+      # delivery-events carries: DeliveryMatchingEvent, DeliveryPartnerAssignedEvent, OfferExpiredEvent
+      KAFKA_CREATE_TOPICS: "driver-location-pings:8:1,order-events:1:1,payment-events:1:1,restaurant-events:1:1,delivery-events:1:1"
+
+  # --- SEARCH ENGINE (Elasticsearch) ---
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  # Runs once after Elasticsearch is healthy to create the restaurant_search_index
+  # with the exact mapping required for geo_point and nested menu_items queries.
+  elasticsearch-setup:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: >
+      sh -c '
+        curl -sf -X PUT "http://elasticsearch:9200/restaurant_search_index" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"mappings\": {
+              \"properties\": {
+                \"restaurant_id\": { \"type\": \"keyword\" },
+                \"name\":          { \"type\": \"text\", \"analyzer\": \"standard\" },
+                \"image_url\":     { \"type\": \"keyword\", \"index\": false },
+                \"status\":        { \"type\": \"keyword\" },
+                \"location\":      { \"type\": \"geo_point\" },
+                \"menu_items\": {
+                  \"type\": \"nested\",
+                  \"properties\": {
+                    \"item_id\":  { \"type\": \"keyword\" },
+                    \"name\":     { \"type\": \"text\" },
+                    \"price\":    { \"type\": \"double\" },
+                    \"category\": { \"type\": \"keyword\" }
+                  }
+                }
+              }
+            }
+          }" \
+        && echo "Index created successfully" \
+        || echo "Index may already exist — skipping"
+      '
+
+  # ── CDC PIPELINE ─────────────────────────────────────────────────────────────
+
+  # Kafka Connect worker — hosts both the Debezium source and ES sink connectors.
+  # Uses the Debezium all-in-one image which bundles the MongoDB connector plugin.
+  kafka-connect:
+    image: debezium/connect:2.5
+    ports:
+      - "8083:8083"
+    depends_on:
+      - kafka
+      - elasticsearch
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: foodzie-connect-cluster
+      CONFIG_STORAGE_TOPIC: foodzie_connect_configs
+      OFFSET_STORAGE_TOPIC: foodzie_connect_offsets
+      STATUS_STORAGE_TOPIC: foodzie_connect_statuses
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+      # Add the Confluent Elasticsearch sink connector to the plugin path
+      CONNECT_PLUGIN_PATH: /kafka/connect,/kafka/connect/elasticsearch
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8083/connectors || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  # Logstash — joins restaurant + menu_item CDC events into a single nested document
+  # before the ES sink connector writes it to restaurant_search_index.
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.1
+    depends_on:
+      - kafka
+      - elasticsearch
+    volumes:
+      - ./cdc-pipeline/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./cdc-pipeline/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      LS_JAVA_OPTS: "-Xms256m -Xmx512m"
+
+  # One-shot container that registers both connectors after Kafka Connect is healthy.
+  kafka-connect-setup:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      kafka-connect:
+        condition: service_healthy
+    restart: "no"
+    volumes:
+      - ./cdc-pipeline/connectors:/connectors:ro
+    environment:
+      MONGODB_URI: ${MONGODB_URI:-mongodb+srv://mdaazam0786:aazam%40786@cluster0.sczcxrl.mongodb.net/}
+    entrypoint: sh /connectors/register-connectors.sh
+
+volumes:
+  mongo-data:
+  es-data:
+
+# ── MICROSERVICES ─────────────────────────────────────────────────────────────
+# Uncomment and configure each service as needed for local development.
+# Each service requires its own Dockerfile in the respective directory.
+
+# websocket-manager:
+#   build:
+#     context: ./websocket-manager
+#     dockerfile: Dockerfile
+#   ports:
+#     - "8094:8094"
+#   depends_on:
+#     - eureka-server
+#     - kafka
+#     - redis
+#     - mongodb
+#   environment:
+#     - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/foodzie
+#     - SPRING_DATA_REDIS_HOST=redis
+#     - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+#     - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/

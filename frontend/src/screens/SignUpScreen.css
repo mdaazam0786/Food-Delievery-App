@@ -1,0 +1,47 @@
+/* ── Sign Up Screen ─────────────────────────────────────────── */
+
+/* Inline validation errors */
+.su__error {
+  font-size: 13px;
+  color: #e53935;
+  margin-top: -10px;
+  margin-bottom: 18px;
+  padding: 0 2px;
+  line-height: 1.4;
+}
+
+/* CTA button — small top gap after the last field / error */
+.su__cta {
+  margin-top: 6px;
+  margin-bottom: 26px;
+}
+
+/* ── "Already have an account?" footer ── */
+.su__login-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 8px;
+}
+
+.su__login-prompt {
+  font-size: 13px;
+  color: #9ea1b1;
+}
+
+/* "LOG IN" highlighted in orange */
+.su__login-link {
+  font-size: 13px;
+  font-weight: 800;
+  color: #ff7a28;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: 0.3px;
+  transition: opacity 0.15s ease;
+}
+
+.su__login-link:hover {
+  opacity: 0.75;
+}

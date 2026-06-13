@@ -1,0 +1,72 @@
+/* ── Form Input ─────────────────────────────────────────────── */
+
+.fi {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* Uppercase muted-gray label */
+.fi__label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #b0b7c3;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  margin-bottom: 9px;
+}
+
+/* Soft light-blue-tinted input block */
+.fi__container {
+  display: flex;
+  align-items: center;
+  background-color: #f7f8fc;
+  border-radius: 14px;
+  height: 58px;
+  padding: 0 18px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.fi__container:focus-within {
+  border-color: #ff7a28;
+  box-shadow: 0 0 0 3px rgba(255, 122, 40, 0.12);
+}
+
+/* Text field */
+.fi__field {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 400;
+  color: #1e2229;
+  background: transparent;
+  border: none;
+  outline: none;
+  height: 100%;
+  min-width: 0;
+}
+
+.fi__field::placeholder {
+  color: #c8cdd8;
+  font-weight: 400;
+}
+
+/* Eye toggle button */
+.fi__eye-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  margin-left: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #b0b7c3;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.fi__eye-btn:hover {
+  color: #ff7a28;
+}

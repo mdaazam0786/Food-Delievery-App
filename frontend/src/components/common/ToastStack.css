@@ -1,0 +1,135 @@
+/* ─────────────────────────────────────────────────────────────
+   ToastStack — Toast notification component
+───────────────────────────────────────────────────────────── */
+
+.ts-stack {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 9998;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 480px) {
+  .ts-stack {
+    left: auto;
+    right: 20px;
+    width: auto;
+    max-width: none;
+  }
+}
+
+.ts-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  animation: ts-slide-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: auto;
+}
+
+@keyframes ts-slide-in {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes ts-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+.ts-toast--success {
+  border-color: #DCFCE7;
+  background: #F0FDF4;
+}
+
+.ts-toast--success .ts-toast__message {
+  color: #166534;
+}
+
+.ts-toast--error {
+  border-color: #FEE2E2;
+  background: #FEF2F2;
+}
+
+.ts-toast--error .ts-toast__message {
+  color: #991B1B;
+}
+
+.ts-toast--warning {
+  border-color: #FEF3C7;
+  background: #FFFBEB;
+}
+
+.ts-toast--warning .ts-toast__message {
+  color: #92400E;
+}
+
+.ts-toast--info {
+  border-color: #DBEAFE;
+  background: #F0F9FF;
+}
+
+.ts-toast--info .ts-toast__message {
+  color: #0C4A6E;
+}
+
+.ts-toast__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ts-toast__message {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.ts-toast__close {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+  padding: 0;
+}
+
+.ts-toast__close:hover {
+  color: #6B7280;
+}
+
+.ts-toast__close:active {
+  transform: scale(0.9);
+}
