@@ -1,4 +1,4 @@
-# Multi-stage build for Eureka Server
+# Multi-stage build for Delivery Acceptance Service
 FROM maven:3.9-eclipse-temurin-21 as builder
 
 WORKDIR /build
@@ -14,7 +14,7 @@ WORKDIR /app
 COPY --from=builder /build/target/*.jar app.jar
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD wget -q -O - http://localhost:8761/actuator/health | grep -q UP || exit 1
+  CMD wget -q -O - http://localhost:8095/actuator/health | grep -q UP || exit 1
 
-EXPOSE 8761
+EXPOSE 8095
 ENTRYPOINT ["java", "-jar", "app.jar"]
