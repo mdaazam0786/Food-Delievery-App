@@ -10,11 +10,16 @@ microservices. These values should be set in your deployment platform
 DATABASE CONFIGURATION (Already in application.properties - No env vars needed)
 ================================================================================
 
-MySQL (Railway):
-- URL: thomas.proxy.rlwy.net:27174
+MySQL (Railway) - SINGLE SHARED DATABASE:
+- Host: thomas.proxy.rlwy.net
+- Port: 27174
 - Username: root
 - Password: yhWvanlmaBlHndJzHPoIsCOPHpfeMpqI
 - Database: foodzie
+- Connection URL: jdbc:mysql://thomas.proxy.rlwy.net:27174/foodzie
+
+NOTE: All services (auth-service, user-service, delivery-service, delivery-matching-service, 
+delivery-acceptance-service) use this same single database instance.
 
 MongoDB (Atlas):
 - URI: mongodb+srv://mdaazam0786:aazam%40786@cluster0.sczcxrl.mongodb.net/foodzie
