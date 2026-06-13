@@ -191,16 +191,17 @@ Before deploying each service:
 [ ] All microservices can reach each other via their service names
 
 ================================================================================
-RAILWAY DEPLOYMENT SPECIFIC NOTES
+SERVICE DEPLOYMENT URLS (LIVE)
 ================================================================================
 
-1. Set environment variables in Railway dashboard for each service
-2. Services communicate internally using Railway's internal domains:
-   - redis.railway.internal (for Redis)
-   - MongoDB Atlas URLs work as-is
-   - Elasticsearch endpoint works as-is
-3. Each service gets its own port (8082, 8083, 8086, 8087, 8090, etc.)
-4. Set JAVA_OPTS if needed: -Xms256m -Xmx512m
+Eureka Server: https://food-delievery-app-eureka-server.onrender.com
+
+Auth Service: https://food-delievery-app-auth-service.onrender.com
+
+All other microservices are registered with Eureka and accessible via:
+- Service Discovery: Use Eureka at https://food-delievery-app-eureka-server.onrender.com
+- Service-to-Service Communication: Services use service names (e.g., auth-service, user-service)
+- All services register with the live Eureka server on deployment
 
 ================================================================================
 DOCKER COMPOSE DEPLOYMENT SPECIFIC NOTES
