@@ -998,6 +998,99 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:4200
 
 ---
 
+## 🧪 Testing & Test Cards
+
+### Payment Gateway - Razorpay Test Mode
+
+The payment gateway is currently configured in **test mode**. Use the following test card details to simulate payment transactions during development and testing.
+
+#### Test Card Numbers
+
+All test cards accept any future expiry date and a random CVV (e.g., 123).
+
+| Card Type | Card Number | Usage | CVV | Expiry |
+|-----------|-------------|-------|-----|--------|
+| **Visa** | `4100 2800 0000 1007` | Standard payment | Any 3 digits | Any future date |
+| **Mastercard** | `5500 6700 0000 1002` | Standard payment | Any 3 digits | Any future date |
+| **RuPay** | `6527 6589 0000 1005` | Indian domestic | Any 3 digits | Any future date |
+| **Diners** | `3608 280009 1007` | Premium card | Any 3 digits | Any future date |
+| **Amex** | `3402 560004 01007` | American Express | Any 4 digits | Any future date |
+
+#### Example Test Checkout
+
+```json
+// Sample request body for POST /api/payments/create
+{
+  "orderId": "order123",
+  "amount": 550,
+  "currency": "INR",
+  "customerEmail": "customer@example.com",
+  "customerPhone": "+91XXXXXXXXXX"
+}
+
+// Card details to enter in checkout form:
+Card Number: 4100 2800 0000 1007
+Expiry: 12/25
+CVV: 123
+Name: Test Customer
+```
+
+#### Payment Flow in Test Mode
+
+1. Customer places order (creates order in system)
+2. Clicks "Proceed to Payment"
+3. Redirected to Razorpay payment form (test environment)
+4. Enters test card details above
+5. Payment processes instantly (test mode)
+6. Success callback received at `/api/payments/webhook`
+7. Order status updates to `CONFIRMED`
+8. Restaurant receives order notification
+9. Driver matching begins
+
+#### Testing Scenarios
+
+| Scenario | Card to Use | Result |
+|----------|-------------|--------|
+| Successful payment | Any test card above | Order placed successfully |
+| Test failed payment | Use card number `4111 1111 1111 1111` | Payment failure, order cancelled |
+| International card | Visa/Mastercard/Amex | Works in test mode |
+| Local card | RuPay/Diners | Works in test mode |
+
+#### Important Notes
+
+- **Test Mode Only**: These cards only work in Razorpay's test environment
+- **No Real Charges**: No money will be deducted from any account
+- **No Fraud Detection**: All transactions are instantly approved
+- **Webhook Simulation**: Payment confirmations are sent to your webhook endpoint
+- **Production Switch**: Remove test mode flag and use live credentials before going live
+
+#### Payment API Endpoints for Testing
+
+```
+# Initiate payment
+POST /api/payments/create
+{
+  "orderId": "order123",
+  "amount": 550,
+  "currency": "INR"
+}
+
+# Webhook (called by Razorpay)
+POST /api/payments/webhook
+{
+  "event": "payment.authorized",
+  "payload": { ... }
+}
+
+# Check payment status
+GET /api/payments/{paymentId}
+
+# Refund (for testing cancellations)
+POST /api/payments/{paymentId}/refund
+```
+
+---
+
 ## 🐛 Error Handling & Status Codes
 
 | Status | Scenario | Example |
