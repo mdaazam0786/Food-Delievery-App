@@ -43,15 +43,22 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         try {
+            log.info("OAuth2 authentication success, building redirect URL...");
             UserPrincipal principal = resolvePrincipal(authentication.getPrincipal());
+            log.info("Principal resolved: {}", principal.getUsername());
+            
             String accessToken = tokenProvider.generateAccessToken(principal);
             String refreshToken = authService.createRefreshToken(principal, request);
+            log.info("Tokens generated. Access token length: {}, Refresh token length: {}", 
+                accessToken.length(), refreshToken.length());
 
             String targetUrl = UriComponentsBuilder
                     .fromUriString(frontendUrl + "/auth/callback")
                     .queryParam("token", accessToken)
                     .queryParam("refreshToken", refreshToken)
                     .build().toUriString();
+
+            log.info("Redirecting to: {}", targetUrl);
 
             if (response.isCommitted()) {
                 log.debug("Response already committed, cannot redirect to {}", targetUrl);
