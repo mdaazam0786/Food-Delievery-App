@@ -7,19 +7,13 @@ export default defineConfig({
     port: 3001,
     open: true,
     proxy: {
-      // Forward all /api calls to the Spring Cloud Gateway
+      // Local development only - forward to localhost services
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
       },
-      // OAuth2 — proxy directly to auth-service (8082) to avoid gateway session issues
-      '/oauth2/authorize': {
-        target: 'http://localhost:8082',
-        changeOrigin: true,
-        secure: false,
-      },
-      '/oauth2/callback': {
+      '/oauth2': {
         target: 'http://localhost:8082',
         changeOrigin: true,
         secure: false,
@@ -30,5 +24,10 @@ export default defineConfig({
         secure: false,
       },
     },
+  },
+  // Production build output
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
   },
 });

@@ -20,6 +20,6 @@
     "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "serve": "serve -s dist -l 3001"
+    "serve": "serve -s dist --config serve.json"
   }
 }
