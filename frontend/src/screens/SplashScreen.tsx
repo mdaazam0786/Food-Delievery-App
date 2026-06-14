@@ -7,11 +7,17 @@ const SplashScreen: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('SplashScreen mounted, checking token...');
     const timer = setTimeout(() => {
       const token = getToken();
+      console.log('Token check result:', { hasToken: !!token, token: token ? `${token.substring(0, 20)}...` : null });
+      
       if (token) {
-        navigate(getDestinationByRole(), { replace: true });
+        const destination = getDestinationByRole();
+        console.log('User has token, navigating to:', destination);
+        navigate(destination, { replace: true });
       } else {
+        console.log('No token found, navigating to onboarding');
         navigate('/onboarding', { replace: true });
       }
     }, 2000);

@@ -19,20 +19,33 @@ const OAuthCallbackScreen: React.FC = () => {
     const refreshToken = searchParams.get('refreshToken');
     const error        = searchParams.get('error');
 
+    // Debug: log what we received
+    console.log('OAuth callback received:', {
+      token: token ? `${token.substring(0, 20)}...` : null,
+      refreshToken: refreshToken ? `${refreshToken.substring(0, 20)}...` : null,
+      error,
+      urlParams: Array.from(searchParams.entries()),
+    });
+
     if (error) {
+      console.error('OAuth error:', error);
       navigate(`/login?error=${encodeURIComponent(error)}`, { replace: true });
       return;
     }
 
     if (!token || !refreshToken) {
+      console.error('Missing tokens:', { hasToken: !!token, hasRefreshToken: !!refreshToken });
       navigate('/login?error=OAuth+sign-in+did+not+return+tokens', { replace: true });
       return;
     }
 
     try {
       persistOAuthSession(token, refreshToken);
-      navigate(getPostLoginRoute(), { replace: true });
-    } catch {
+      const route = getPostLoginRoute();
+      console.log('OAuth successful, navigating to:', route);
+      navigate(route, { replace: true });
+    } catch (err) {
+      console.error('OAuth session persistence failed:', err);
       navigate('/login?error=Failed+to+complete+OAuth+sign-in', { replace: true });
     }
   }, [navigate, searchParams]);

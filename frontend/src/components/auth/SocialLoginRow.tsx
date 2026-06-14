@@ -77,7 +77,10 @@ const SocialLoginRow: React.FC<SocialLoginRowProps> = ({ className = '' }) => (
         icon={icon}
         backgroundColor={bg}
         border={border}
-        onClick={() => startOAuthLogin(id)}
+        onClick={() => {
+          console.log(`Starting OAuth login with provider: ${id}`);
+          startOAuthLogin(id);
+        }}
         ariaLabel={label}
       />
     ))}
