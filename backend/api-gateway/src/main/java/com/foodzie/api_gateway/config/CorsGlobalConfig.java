@@ -23,11 +23,12 @@ public class CorsGlobalConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow all frontend dev origins
+        // Allow all frontend dev origins and production
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "http://localhost:3001",
-                "http://localhost:4200"
+                "http://localhost:4200",
+                "https://food-delievery-app-b6b3.vercel.app"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

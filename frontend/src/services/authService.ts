@@ -347,11 +347,17 @@ export function persistOAuthSession(accessToken: string, refreshToken: string): 
 /**
  * Redirects the browser to the Spring Security OAuth2 authorization endpoint.
  *
+ * For production, OAuth flow must go directly to auth-service (not API Gateway)
+ * because OAuth redirects need proper handling of session state.
+ *
  * Flow:
  *   1. GET /oauth2/authorize/{provider}  → provider consent screen
  *   2. GET /oauth2/callback/{provider}   → auth-service issues JWT
  *   3. Redirect to /auth/callback?token=…&refreshToken=…
  */
 export function startOAuthLogin(provider: OAuthProvider): void {
-  window.location.href = `${BASE_URL}/oauth2/authorize/${provider}`;
+  // In production, OAuth must go directly to auth-service
+  const authServiceUrl = import.meta.env.VITE_AUTH_SERVICE_URL || `${BASE_URL}/oauth2/authorize/${provider}`;
+  const oauthUrl = `${authServiceUrl}/oauth2/authorize/${provider}`;
+  window.location.href = oauthUrl;
 }
