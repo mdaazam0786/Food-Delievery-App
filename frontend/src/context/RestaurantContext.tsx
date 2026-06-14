@@ -55,15 +55,7 @@ export const RestaurantProvider: React.FC<{ children: ReactNode }> = ({ children
       setActiveRestaurantId(mine.id);
       setRestaurantStatusState((mine.status as 'OPEN' | 'CLOSED') ?? 'OPEN');
       setNoRestaurant(false);
-      if (profile) {
-        setUserProfile({
-          ...profile,
-          associatedRestaurant: {
-            restaurantId:   mine.id,
-            restaurantName: mine.name,
-          },
-        });
-      }
+      setUserProfile(profile || null);
       return;
     }
 

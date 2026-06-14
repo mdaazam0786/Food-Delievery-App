@@ -1,14 +1,11 @@
 import type { UserProfile } from '../services/userService';
 
-/** First token of fullName, or a cleaned username — null when unavailable. */
+/** First token of fullName — null when unavailable. */
 export function resolveFirstName(profile: UserProfile | null | undefined): string | null {
   if (!profile) return null;
 
   const fromFull = profile.fullName?.trim().split(/\s+/).find(Boolean);
   if (fromFull) return fromFull;
-
-  const fromUsername = profile.username?.trim().replace(/[_0-9].*$/, '').trim();
-  if (fromUsername) return fromUsername;
 
   return null;
 }

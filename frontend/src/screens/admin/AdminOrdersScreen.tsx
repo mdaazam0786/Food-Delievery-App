@@ -11,7 +11,6 @@ import {
 import {
   splitRestaurantOrders,
   toIncomingOrder,
-  toActiveOrder,
   type ActiveStatus,
   type ActiveOrder,
   type IncomingOrder,

@@ -7,7 +7,7 @@ import './EditProfileScreen.css';
 interface FormState {
   fullName: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
 }
 
 const EditProfileScreen: React.FC = () => {
@@ -15,7 +15,7 @@ const EditProfileScreen: React.FC = () => {
   const [form, setForm] = useState<FormState>({
     fullName: '',
     email: '',
-    phone: '',
+    phoneNumber: '',
   });
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +32,7 @@ const EditProfileScreen: React.FC = () => {
         setForm({
           fullName: profile.fullName || '',
           email: profile.email || '',
-          phone: profile.phone || '',
+          phoneNumber: profile.phoneNumber || '',
         });
         setError(null);
       } catch (err) {
@@ -67,7 +67,7 @@ const EditProfileScreen: React.FC = () => {
       const updated = await updateUserProfile({
         fullName: form.fullName.trim(),
         email: form.email.trim(),
-        phone: form.phone.trim() || undefined,
+        phoneNumber: form.phoneNumber.trim() || undefined,
       });
 
       setUser(updated);
@@ -181,8 +181,8 @@ const EditProfileScreen: React.FC = () => {
           <FormInput
             label="Phone Number"
             placeholder="Enter your phone number"
-            value={form.phone}
-            onChange={(value) => handleChange('phone', value)}
+            value={form.phoneNumber}
+            onChange={(value) => handleChange('phoneNumber', value)}
             type="tel"
             autoComplete="tel"
             className="ep-form__field"

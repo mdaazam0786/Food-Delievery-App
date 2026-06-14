@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import FormInput from '../components/auth/FormInput';
 import SaveAddressDrawer from '../components/address/SaveAddressDrawer';
 import { fetchCurrentUser, updateUserProfile, getUserAddresses, type UserProfile, type UserAddress } from '../services/userService';
-import { fetchUserOrders, type RestaurantOrder, type Page } from '../services/orderService';
+import { fetchUserOrders, type RestaurantOrder } from '../services/orderService';
 import { getRestaurantDetails, type RestaurantResponse } from '../services/restaurantService';
 import { logout } from '../services/authService';
 import './ProfileScreen.css';

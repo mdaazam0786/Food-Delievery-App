@@ -376,7 +376,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
   const [deliveryPage, setDeliveryPage] = useState(0);
   const [earningsPage, setEarningsPage] = useState(0);
 
-  const locationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── Onboarding Guard & Load Earnings Data ─────────────────────────────────
 

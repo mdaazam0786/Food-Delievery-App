@@ -13,12 +13,10 @@
 
 import { useCallback, useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { useToast } from '../context/ToastContext';
 import type { MenuItemResponse } from '../services/restaurantService';
 
 export function useCartOperations() {
   const { addItem, removeItem, updateQuantity } = useCart();
-  const { showToast } = useToast();
   const [operationLoading, setOperationLoading] = useState(false);
 
   // ── Add item to cart ──
@@ -30,7 +28,6 @@ export function useCartOperations() {
         // Toast is shown in CartContext
         return true;
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to add item';
         console.error('Add to cart error:', err);
         return false;
       } finally {
@@ -49,7 +46,6 @@ export function useCartOperations() {
         // Toast is shown in CartContext
         return true;
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to update quantity';
         console.error('Update quantity error:', err);
         return false;
       } finally {
@@ -68,7 +64,6 @@ export function useCartOperations() {
         // Toast is shown in CartContext
         return true;
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to remove item';
         console.error('Remove from cart error:', err);
         return false;
       } finally {

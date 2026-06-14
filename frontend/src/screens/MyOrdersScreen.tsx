@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchUserOrderHistory, type RestaurantOrder, type Page } from '../services/orderService';
+import { fetchUserOrderHistory, type RestaurantOrder } from '../services/orderService';
 import { getRestaurantDetails, type RestaurantResponse } from '../services/restaurantService';
 import './MyOrdersScreen.css';
 
@@ -103,7 +103,7 @@ const MyOrdersScreen: React.FC = () => {
     console.log('Rate order:', order.id);
   };
 
-  const filteredOrders = orders.filter((order) => {
+  const filteredOrders = orders.filter(() => {
     if (activeTab === 'ongoing') {
       return false; // For now, no ongoing orders - to be implemented later
     }
@@ -175,14 +175,13 @@ const MyOrdersScreen: React.FC = () => {
               </div>
             ) : (
               <div className="myorders-list">
-                {filteredOrders.map((order) => (
-                  <div key={order.id} className="myorders-card">
-                    {/* Card Header - Restaurant Info */}
+                {filteredOrders.map((currentOrder) => (
+                  <div key={currentOrder.id} className="myorders-card">
                     <div className="myorders-card__header">
                       <div className="myorders-card__thumb">
                         <img
-                          src={order.restaurant?.imageUrl || RESTAURANT_FALLBACK}
-                          alt={order.restaurant?.name || 'Restaurant'}
+                          src={currentOrder.restaurant?.imageUrl || RESTAURANT_FALLBACK}
+                          alt={currentOrder.restaurant?.name || 'Restaurant'}
                           className="myorders-card__image"
                           onError={(e) => {
                             (e.currentTarget as HTMLImageElement).src = RESTAURANT_FALLBACK;
@@ -192,23 +191,23 @@ const MyOrdersScreen: React.FC = () => {
                       <div className="myorders-card__info">
                         <div className="myorders-card__title-row">
                           <h3 className="myorders-card__name">
-                            {order.restaurant?.name || 'Restaurant'}
+                            {currentOrder.restaurant?.name || 'Restaurant'}
                           </h3>
                           <span className="myorders-card__order-id">
-                            #{order.id.substring(0, 6).toUpperCase()}
+                            #{currentOrder.id.substring(0, 6).toUpperCase()}
                           </span>
                         </div>
                         <div className="myorders-card__meta">
                           <span className="myorders-card__amount">
-                            {formatAmount(order.totalAmount)}
+                            {formatAmount(currentOrder.totalAmount)}
                           </span>
                           <span className="myorders-card__dot">•</span>
                           <span className="myorders-card__date">
-                            {formatDate(order.createdAt)}
+                            {formatDate(currentOrder.createdAt)}
                           </span>
                           <span className="myorders-card__dot">•</span>
                           <span className="myorders-card__items">
-                            {String(order.items.length).padStart(2, '0')} Items
+                            {String(currentOrder.items.length).padStart(2, '0')} Items
                           </span>
                         </div>
                       </div>
@@ -216,8 +215,8 @@ const MyOrdersScreen: React.FC = () => {
 
                     {/* Card Body - Status Badge */}
                     <div className="myorders-card__body">
-                      <div className={`myorders-badge myorders-badge--${getStatusBadgeClass(order.status)}`}>
-                        {getStatusLabel(order.status)}
+                      <div className={`myorders-badge myorders-badge--${getStatusBadgeClass(currentOrder.status)}`}>
+                        {getStatusLabel(currentOrder.status)}
                       </div>
                     </div>
 
@@ -225,13 +224,13 @@ const MyOrdersScreen: React.FC = () => {
                     <div className="myorders-card__footer">
                       <button
                         className="myorders-card__btn myorders-card__btn--outline"
-                        onClick={() => handleRate(order)}
+                        onClick={() => handleRate(currentOrder)}
                       >
                         Rate
                       </button>
                       <button
                         className="myorders-card__btn myorders-card__btn--primary"
-                        onClick={() => handleReOrder(order)}
+                        onClick={() => handleReOrder(currentOrder)}
                       >
                         Re-Order
                       </button>

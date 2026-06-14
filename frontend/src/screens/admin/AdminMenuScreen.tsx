@@ -34,17 +34,17 @@ const EMPTY_FORM: FormState = {
 const CATEGORIES = ['Burger', 'Pizza', 'Sandwich', 'Chicken', 'Drinks', 'Sides', 'Desserts'];
 
 // ─── Seed menu items ──────────────────────────────────────────────────────────
-
-const SEED_ITEMS: MenuItem[] = [
-  { id: 'm1', name: 'Burger Bistro',       category: 'Burger',   price: '₹720', description: 'Classic smash burger with lettuce, tomato & special sauce.' },
-  { id: 'm2', name: "Smokin' Burger",       category: 'Burger',   price: '₹840', description: 'Smoky BBQ patty with caramelised onions.' },
-  { id: 'm3', name: 'Margherita Pizza',     category: 'Pizza',    price: '₹840', description: 'San Marzano tomato, fresh mozzarella, basil.' },
-  { id: 'm4', name: 'Pepperoni Pizza',      category: 'Pizza',    price: '₹960', description: 'Loaded with premium pepperoni slices.' },
-  { id: 'm5', name: 'Club Sandwich',        category: 'Sandwich', price: '₹540',  description: 'Triple-decker with chicken, bacon & avocado.' },
-  { id: 'm6', name: 'Crispy Chicken',       category: 'Chicken',  price: '₹720', description: 'Southern-style fried chicken fillet.' },
-  { id: 'm7', name: 'Mango Shake',          category: 'Drinks',   price: '₹300',  description: 'Fresh mango blended with milk & ice cream.' },
-  { id: 'm8', name: 'Lemonade',             category: 'Drinks',   price: '₹240',  description: 'Freshly squeezed with a hint of mint.' },
-];
+// TODO: Seed items can be used for demo/testing purposes
+// const SEED_ITEMS: MenuItem[] = [
+//   { id: 'm1', name: 'Burger Bistro',       category: 'Burger',   price: '₹720', description: 'Classic smash burger with lettuce, tomato & special sauce.' },
+//   { id: 'm2', name: "Smokin' Burger",       category: 'Burger',   price: '₹840', description: 'Smoky BBQ patty with caramelised onions.' },
+//   { id: 'm3', name: 'Margherita Pizza',     category: 'Pizza',    price: '₹840', description: 'San Marzano tomato, fresh mozzarella, basil.' },
+//   { id: 'm4', name: 'Pepperoni Pizza',      category: 'Pizza',    price: '₹960', description: 'Loaded with premium pepperoni slices.' },
+//   { id: 'm5', name: 'Club Sandwich',        category: 'Sandwich', price: '₹540',  description: 'Triple-decker with chicken, bacon & avocado.' },
+//   { id: 'm6', name: 'Crispy Chicken',       category: 'Chicken',  price: '₹720', description: 'Southern-style fried chicken fillet.' },
+//   { id: 'm7', name: 'Mango Shake',          category: 'Drinks',   price: '₹300',  description: 'Fresh mango blended with milk & ice cream.' },
+//   { id: 'm8', name: 'Lemonade',             category: 'Drinks',   price: '₹240',  description: 'Freshly squeezed with a hint of mint.' },
+// ];
 
 // ─── Category colour map ──────────────────────────────────────────────────────
 
@@ -404,22 +404,17 @@ const AddItemForm: React.FC<AddFormProps> = ({ onClose, onSubmit }) => {
 const AdminMenuScreen: React.FC = () => {
   const { activeRestaurantId } = useRestaurant();
   
-  const [items, setItems]         = useState<MenuItem[]>([]);
-  const [showForm, setShowForm]   = useState(false);
+  const [items, setItems] = useState<MenuItem[]>([]);
+  const [showForm, setShowForm] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('All');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // On component mount, load menu items from backend
   React.useEffect(() => {
     const loadMenuItems = async () => {
       try {
-        setLoading(true);
-        setError(null);
         
         if (!activeRestaurantId) {
           setItems([]);
-          setLoading(false);
           return;
         }
 
@@ -439,10 +434,8 @@ const AdminMenuScreen: React.FC = () => {
         setItems(formattedItems);
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load menu items';
-        setError(errorMsg);
+        console.error(errorMsg);
         setItems([]);
-      } finally {
-        setLoading(false);
       }
     };
 

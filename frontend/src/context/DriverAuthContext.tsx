@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import React, { createContext, useState, useCallback, ReactNode } from 'react';
 import { getAccessToken } from '../services/authService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

@@ -53,139 +53,30 @@ const StarIcon = () => (
 
 
 // ─── Restaurant thumbnail SVGs ────────────────────────────────────────────────
-
-const ThumbPansi = () => (
-  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <rect width="64" height="64" rx="12" fill="#FFF3E8"/>
-    {/* Plate */}
-    <circle cx="32" cy="36" r="20" fill="#F5F5F5"/>
-    <circle cx="32" cy="36" r="17" fill="white" stroke="#E0E0E0" strokeWidth="1"/>
-    {/* Noodles */}
-    <path d="M18 34 Q24 28 32 34 Q40 40 46 34" stroke="#FFCC80" strokeWidth="4"
-      strokeLinecap="round" fill="none"/>
-    <path d="M18 38 Q24 32 32 38 Q40 44 46 38" stroke="#FFCC80" strokeWidth="4"
-      strokeLinecap="round" fill="none"/>
-    {/* Toppings */}
-    <circle cx="26" cy="32" r="4" fill="#E53935" opacity="0.85"/>
-    <circle cx="38" cy="36" r="3.5" fill="#E53935" opacity="0.85"/>
-    <circle cx="32" cy="30" r="3" fill="#66BB6A"/>
-    {/* Chopsticks */}
-    <line x1="22" y1="14" x2="30" y2="34" stroke="#795548" strokeWidth="2.5"
-      strokeLinecap="round"/>
-    <line x1="28" y1="12" x2="34" y2="32" stroke="#795548" strokeWidth="2.5"
-      strokeLinecap="round"/>
-  </svg>
-);
-
-const ThumbBurgerJoint = () => (
-  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <rect width="64" height="64" rx="12" fill="#FFF8E1"/>
-    {/* Bun top */}
-    <ellipse cx="32" cy="22" rx="18" ry="10" fill="#F4A340"/>
-    <ellipse cx="32" cy="20" rx="16" ry="8" fill="#FFCC80"/>
-    {/* Sesame */}
-    <ellipse cx="26" cy="18" rx="2.5" ry="1.5" fill="#D4A017" opacity="0.7"/>
-    <ellipse cx="33" cy="16" rx="2.5" ry="1.5" fill="#D4A017" opacity="0.7"/>
-    <ellipse cx="39" cy="19" rx="2.5" ry="1.5" fill="#D4A017" opacity="0.7"/>
-    {/* Lettuce */}
-    <rect x="14" y="30" width="36" height="6" rx="2" fill="#8BC34A"/>
-    {/* Patty */}
-    <rect x="14" y="35" width="36" height="8" rx="3" fill="#795548"/>
-    {/* Cheese */}
-    <rect x="12" y="33" width="40" height="5" rx="2" fill="#FFC107" opacity="0.9"/>
-    {/* Bun bottom */}
-    <ellipse cx="32" cy="46" rx="18" ry="7" fill="#E8834A"/>
-  </svg>
-);
-
-const ThumbPizzaPlace = () => (
-  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <rect width="64" height="64" rx="12" fill="#FFF3E8"/>
-    <circle cx="32" cy="34" r="22" fill="#FF7622" opacity="0.15"/>
-    <circle cx="32" cy="34" r="19" fill="#FFCC80"/>
-    <circle cx="32" cy="34" r="15" fill="#FF7622" opacity="0.85"/>
-    <circle cx="32" cy="34" r="11" fill="#FFCC80"/>
-    {[
-      [26,28],[36,26],[28,38],[38,36],[32,32]
-    ].map(([cx,cy],i) => (
-      <circle key={i} cx={cx} cy={cy} r="3.5" fill="#E53935" opacity="0.85"/>
-    ))}
-    <circle cx="32" cy="34" r="19" fill="none"
-      stroke="#E8834A" strokeWidth="5" strokeDasharray="8 5"/>
-  </svg>
-);
-
-const ThumbSaladBar = () => (
-  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <rect width="64" height="64" rx="12" fill="#E8F5E9"/>
-    <circle cx="32" cy="36" r="20" fill="#F5F5F5"/>
-    <circle cx="32" cy="36" r="17" fill="white" stroke="#E0E0E0" strokeWidth="1"/>
-    {/* Greens */}
-    <ellipse cx="26" cy="32" rx="9" ry="6" fill="#66BB6A" opacity="0.9"
-      transform="rotate(-15 26 32)"/>
-    <ellipse cx="38" cy="30" rx="8" ry="5" fill="#8BC34A" opacity="0.9"
-      transform="rotate(10 38 30)"/>
-    <ellipse cx="32" cy="38" rx="10" ry="6" fill="#4CAF50" opacity="0.8"
-      transform="rotate(-5 32 38)"/>
-    {/* Tomatoes */}
-    <circle cx="24" cy="38" r="4" fill="#E53935" opacity="0.85"/>
-    <circle cx="40" cy="36" r="3.5" fill="#E53935" opacity="0.85"/>
-    {/* Croutons */}
-    <rect x="29" y="30" width="6" height="6" rx="2" fill="#F4A340"/>
-    <rect x="34" y="38" width="5" height="5" rx="1.5" fill="#F4A340"/>
-    {/* Dressing drizzle */}
-    <path d="M20 34 Q28 28 36 34 Q40 37 44 34" stroke="#FFF176"
-      strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.8"/>
-  </svg>
-);
-
-const ThumbSushiSpot = () => (
-  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <rect width="64" height="64" rx="12" fill="#E3F2FD"/>
-    {/* Plate */}
-    <ellipse cx="32" cy="42" rx="22" ry="8" fill="#F5F5F5"/>
-    <ellipse cx="32" cy="40" rx="20" ry="6" fill="white" stroke="#E0E0E0" strokeWidth="1"/>
-    {/* Sushi roll 1 */}
-    <ellipse cx="22" cy="34" rx="8" ry="10" fill="#1A1A2E"/>
-    <ellipse cx="22" cy="34" rx="6" ry="8" fill="white"/>
-    <ellipse cx="22" cy="34" rx="4" ry="5" fill="#E53935" opacity="0.85"/>
-    <ellipse cx="22" cy="34" rx="2" ry="2.5" fill="#FF8A65"/>
-    {/* Sushi roll 2 */}
-    <ellipse cx="38" cy="33" rx="8" ry="10" fill="#1A1A2E"/>
-    <ellipse cx="38" cy="33" rx="6" ry="8" fill="white"/>
-    <ellipse cx="38" cy="33" rx="4" ry="5" fill="#FF7622" opacity="0.85"/>
-    <ellipse cx="38" cy="33" rx="2" ry="2.5" fill="#FFCC80"/>
-    {/* Wasabi + ginger */}
-    <ellipse cx="32" cy="40" rx="4" ry="2.5" fill="#66BB6A" opacity="0.8"/>
-    <ellipse cx="32" cy="38" rx="3" ry="2" fill="#FFCDD2" opacity="0.8"/>
-    {/* Chopsticks */}
-    <line x1="10" y1="18" x2="24" y2="36" stroke="#795548" strokeWidth="2"
-      strokeLinecap="round"/>
-    <line x1="14" y1="16" x2="26" y2="34" stroke="#795548" strokeWidth="2"
-      strokeLinecap="round"/>
-  </svg>
-);
-
+// TODO: Thumbnail icons can be used when suggested restaurants feature is enabled
+// Removed unused components - can be restored from git history if needed
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const RECENT_KEYWORDS = ['Burger', 'Sandwich', 'Pizza', 'Sushi', 'Chicken', 'Salad'];
 
-interface SuggestedRestaurant {
-  id: string;
-  name: string;
-  cuisine: string;
-  rating: string;
-  Thumb: React.FC;
-}
+// TODO: SuggestedRestaurant interface can be used when suggested restaurants feature is enabled
+// interface SuggestedRestaurant {
+//   id: string;
+//   name: string;
+//   cuisine: string;
+//   rating: string;
+//   Thumb: React.FC;
+// }
 
-const SUGGESTED: SuggestedRestaurant[] = [
-  { id: '1', name: 'Pansi Restaurant',    cuisine: 'Noodles · Asian · Rice',    rating: '4.7', Thumb: ThumbPansi       },
-  { id: '2', name: 'Burger Joint',        cuisine: 'Burgers · American · Fries', rating: '4.5', Thumb: ThumbBurgerJoint },
-  { id: '3', name: 'Pizza Palace',        cuisine: 'Pizza · Italian · Pasta',    rating: '4.8', Thumb: ThumbPizzaPlace  },
-  { id: '4', name: 'The Salad Bar',       cuisine: 'Salads · Healthy · Wraps',   rating: '4.3', Thumb: ThumbSaladBar    },
-  { id: '5', name: 'Sushi Spot',          cuisine: 'Sushi · Japanese · Rolls',   rating: '4.9', Thumb: ThumbSushiSpot   },
-];
+// TODO: Suggested restaurants can be displayed when search feature is enhanced
+// const SUGGESTED: SuggestedRestaurant[] = [
+//   { id: '1', name: 'Pansi Restaurant',    cuisine: 'Noodles · Asian · Rice',    rating: '4.7', Thumb: ThumbPansi       },
+//   { id: '2', name: 'Burger Joint',        cuisine: 'Burgers · American · Fries', rating: '4.5', Thumb: ThumbBurgerJoint },
+//   { id: '3', name: 'Pizza Palace',        cuisine: 'Pizza · Italian · Pasta',    rating: '4.8', Thumb: ThumbPizzaPlace  },
+//   { id: '4', name: 'The Salad Bar',       cuisine: 'Salads · Healthy · Wraps',   rating: '4.3', Thumb: ThumbSaladBar    },
+//   { id: '5', name: 'Sushi Spot',          cuisine: 'Sushi · Japanese · Rolls',   rating: '4.9', Thumb: ThumbSushiSpot   },
+// ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 

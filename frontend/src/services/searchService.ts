@@ -9,20 +9,6 @@ import type { SearchRestaurant } from '../utils/geoUtils';
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
 
-interface ApiResponse<T> {
-  success: boolean;
-  message?: string;
-  data: T;
-}
-
-interface PagedSearchResponse {
-  results:   SearchRestaurant[];
-  totalHits: number;
-  page:      number;
-  size:      number;
-  hasMore:   boolean;
-}
-
 export async function fetchNearbyRestaurants(
   lat: number,
   lon: number,
