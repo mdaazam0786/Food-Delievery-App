@@ -356,8 +356,8 @@ export function persistOAuthSession(accessToken: string, refreshToken: string): 
  *   3. Redirect to /auth/callback?token=…&refreshToken=…
  */
 export function startOAuthLogin(provider: OAuthProvider): void {
-  // In production, OAuth must go directly to auth-service
-  const authServiceUrl = import.meta.env.VITE_AUTH_SERVICE_URL || `${BASE_URL}/oauth2/authorize/${provider}`;
-  const oauthUrl = `${authServiceUrl}/oauth2/authorize/${provider}`;
+  const base = (import.meta.env.VITE_AUTH_SERVICE_URL as string | undefined) || BASE_URL;
+  const oauthUrl = `${base}/oauth2/authorize/${provider}`;
+  console.log('Starting OAuth, navigating to:', oauthUrl);
   window.location.href = oauthUrl;
 }
