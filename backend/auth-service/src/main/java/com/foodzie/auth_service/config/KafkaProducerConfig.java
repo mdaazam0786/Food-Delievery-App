@@ -1,6 +1,7 @@
 package com.foodzie.auth_service.config;
 
 import com.foodzie.auth_service.event.UserRegisteredEvent;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,5 +38,10 @@ public class KafkaProducerConfig {
     @Bean
     public KafkaTemplate<String, UserRegisteredEvent> userRegisteredKafkaTemplate() {
         return new KafkaTemplate<>(userRegisteredProducerFactory());
+    }
+
+    @Bean
+    public NewTopic userRegisteredTopic() {
+        return new NewTopic("user.registered", 3, (short) 1);
     }
 }

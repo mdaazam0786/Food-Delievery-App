@@ -1,6 +1,7 @@
 package com.foodzie.location_update_service.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -66,5 +67,10 @@ public class KafkaConfig {
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.BATCH);
         factory.setConcurrency(1);
         return factory;
+    }
+
+    @Bean
+    public NewTopic locationPingsTopic() {
+        return new NewTopic("driver-location-pings", 3, (short) 1);
     }
 }

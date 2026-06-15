@@ -2,6 +2,7 @@ package com.foodzie.websocket_manager.config;
 
 import com.foodzie.websocket_manager.event.OrderStatusUpdatedEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -77,5 +78,17 @@ public class KafkaConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(orderEventConsumerFactory());
         return factory;
+    }
+
+    // ── Topics ───────────────────────────────────────────────────────────────
+
+    @Bean
+    public NewTopic locationPingsTopic() {
+        return new NewTopic("driver-location-pings", 3, (short) 1);
+    }
+
+    @Bean
+    public NewTopic orderEventsTopic() {
+        return new NewTopic("order-events", 3, (short) 1);
     }
 }

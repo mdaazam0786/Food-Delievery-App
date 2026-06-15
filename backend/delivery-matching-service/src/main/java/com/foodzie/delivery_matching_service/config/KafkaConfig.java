@@ -1,6 +1,7 @@
 package com.foodzie.delivery_matching_service.config;
 
 import com.foodzie.delivery_matching_service.event.OrderStatusUpdatedEvent;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -67,5 +68,17 @@ public class KafkaConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(orderStatusConsumerFactory());
         return factory;
+    }
+
+    // ── Topics ───────────────────────────────────────────────────────────────
+
+    @Bean
+    public NewTopic orderEventsTopic() {
+        return new NewTopic("order-events", 3, (short) 1);
+    }
+
+    @Bean
+    public NewTopic deliveryEventsTopic() {
+        return new NewTopic("delivery-events", 3, (short) 1);
     }
 }

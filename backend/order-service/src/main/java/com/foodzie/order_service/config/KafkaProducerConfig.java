@@ -2,6 +2,7 @@ package com.foodzie.order_service.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,5 +35,20 @@ public class KafkaProducerConfig {
     @Bean
     public KafkaTemplate<String, Object> kafkaTemplate() {
         return new KafkaTemplate<>(orderEventProducerFactory());
+    }
+
+    @Bean
+    public NewTopic orderEventsTopic() {
+        return new NewTopic("order-events", 3, (short) 1);
+    }
+
+    @Bean
+    public NewTopic paymentEventsTopic() {
+        return new NewTopic("payment-events", 3, (short) 1);
+    }
+
+    @Bean
+    public NewTopic deliveryEventsTopic() {
+        return new NewTopic("delivery-events", 3, (short) 1);
     }
 }

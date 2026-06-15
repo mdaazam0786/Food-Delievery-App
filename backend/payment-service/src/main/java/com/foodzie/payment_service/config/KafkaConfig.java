@@ -1,6 +1,7 @@
 package com.foodzie.payment_service.config;
 
 import com.foodzie.payment_service.event.OrderCreatedEvent;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -67,5 +68,17 @@ public class KafkaConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(orderCreatedConsumerFactory());
         return factory;
+    }
+
+    // ── Topics ───────────────────────────────────────────────────────────────
+
+    @Bean
+    public NewTopic paymentEventsTopic() {
+        return new NewTopic("payment-events", 3, (short) 1);
+    }
+
+    @Bean
+    public NewTopic orderEventsTopic() {
+        return new NewTopic("order-events", 3, (short) 1);
     }
 }
