@@ -104,6 +104,28 @@ export const RestaurantProvider: React.FC<{ children: ReactNode }> = ({ children
     loadProfile();
   }, []);
 
+  // Monitor localStorage changes to refetch restaurant when user logs back in
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      // If the foodzie_access_token changed (from empty to something or vice versa)
+      if (e.key === 'foodzie_access_token') {
+        if (e.newValue) {
+          // User just logged in - load their restaurant
+          loadProfile();
+        } else {
+          // User just logged out - reset state
+          setActiveRestaurantId(null);
+          setRestaurantStatusState(null);
+          setNoRestaurant(true);
+          setIsProvisioned(false);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [loadProfile]);
+
   return (
     <RestaurantContext.Provider
       value={{
