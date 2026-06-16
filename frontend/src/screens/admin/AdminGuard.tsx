@@ -63,10 +63,11 @@ interface AdminGuardProps {
 }
 
 const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
-  const { profileLoading, noRestaurant, profileError, activeRestaurantId } = useRestaurant();
+  const { profileLoading, noRestaurant, profileError, activeRestaurantId, isProvisioned } = useRestaurant();
   const storedUser = getStoredUser();
   const isRestaurantRole = storedUser?.roles?.includes('ROLE_RESTAURANT') ?? false;
 
+  // Not authenticated or wrong role
   if (!storedUser) {
     return <Navigate to="/login" replace />;
   }
@@ -87,7 +88,12 @@ const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
     return <ErrorScreen message={profileError} />;
   }
 
-  if (noRestaurant || !activeRestaurantId) {
+  // Check if restaurant exists and is properly provisioned
+  // Show provisioning screen if:
+  // 1. No restaurant exists (noRestaurant is true), OR
+  // 2. No activeRestaurantId, OR
+  // 3. Restaurant is not fully provisioned yet
+  if (noRestaurant || !activeRestaurantId || !isProvisioned) {
     return (
       <Suspense fallback={<FullPageSpinner />}>
         <RestaurantProvisioningScreen />

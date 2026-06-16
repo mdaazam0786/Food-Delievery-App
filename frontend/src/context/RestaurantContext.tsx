@@ -20,6 +20,7 @@ export interface RestaurantContextValue {
   userProfile:          UserProfile | null;
   profileLoading:       boolean;
   noRestaurant:         boolean;
+  isProvisioned:        boolean;
   profileError:         string | null;
   refetch:              () => Promise<void>;
   completeProvisioning: (restaurantId: string, restaurantName?: string) => void;
@@ -32,6 +33,7 @@ export const RestaurantContext = createContext<RestaurantContextValue>({
   userProfile:          null,
   profileLoading:       true,
   noRestaurant:         false,
+  isProvisioned:        false,
   profileError:         null,
   refetch:              async () => {},
   completeProvisioning: () => {},
@@ -44,6 +46,7 @@ export const RestaurantProvider: React.FC<{ children: ReactNode }> = ({ children
   const [userProfile,        setUserProfile]        = useState<UserProfile | null>(null);
   const [profileLoading,     setProfileLoading]     = useState(true);
   const [noRestaurant,       setNoRestaurant]       = useState(false);
+  const [isProvisioned,      setIsProvisioned]      = useState(false);
   const [profileError,       setProfileError]       = useState<string | null>(null);
 
   const applyRestaurantState = useCallback((
@@ -56,6 +59,11 @@ export const RestaurantProvider: React.FC<{ children: ReactNode }> = ({ children
       setRestaurantStatusState((mine.status as 'OPEN' | 'CLOSED') ?? 'OPEN');
       setNoRestaurant(false);
       setUserProfile(profile || null);
+      
+      // Check if restaurant is fully provisioned
+      // A restaurant is provisioned if it has address, GST, and FSSAI filled
+      const provisioned = !!(mine.addressText?.trim() && mine.gstNo && mine.fssaiNo);
+      setIsProvisioned(provisioned);
       return;
     }
 
@@ -63,6 +71,7 @@ export const RestaurantProvider: React.FC<{ children: ReactNode }> = ({ children
     setActiveRestaurantId(null);
     setRestaurantStatusState(null);
     setNoRestaurant(true);
+    setIsProvisioned(false);
   }, []);
 
   const loadProfile = useCallback(async () => {
@@ -103,6 +112,7 @@ export const RestaurantProvider: React.FC<{ children: ReactNode }> = ({ children
         userProfile,
         profileLoading,
         noRestaurant,
+        isProvisioned,
         profileError,
         refetch: loadProfile,
         completeProvisioning,
