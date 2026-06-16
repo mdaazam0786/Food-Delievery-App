@@ -283,30 +283,18 @@ export async function getRestaurantDetails(restaurantId: string): Promise<Restau
 }
 
 /**
- * GET /api/admin/restaurants/{restaurantId}/menu
- * Gets paginated menu items for the owner's restaurant (admin endpoint - requires auth).
+ * GET /api/restaurants/{restaurantId}/menu
+ * Gets menu items for a restaurant (public endpoint - no auth required).
  * 
- * Supports Spring Data pagination: ?page=0&size=20&sort=id,desc
+ * Returns available menu items only. Used by customers browsing restaurants.
  */
-export async function getMenuItems(restaurantId: string, page: number = 0, pageSize: number = 20): Promise<MenuItemResponse[]> {
-  const res = await authFetch(`${BASE_URL}/api/admin/restaurants/${restaurantId}/menu?page=${page}&size=${pageSize}`);
+export async function getMenuItems(restaurantId: string): Promise<MenuItemResponse[]> {
+  const res = await fetch(`${BASE_URL}/api/restaurants/${restaurantId}/menu`);
 
-  interface SpringPage<T> {
-    content: T[];
-    pageable: {
-      pageNumber: number;
-      pageSize: number;
-    };
-    totalElements: number;
-    totalPages: number;
-    last: boolean;
-    first: boolean;
-  }
-
-  const json: ApiResponse<SpringPage<MenuItemResponse>> = await res.json().catch(() => ({
+  const json: ApiResponse<MenuItemResponse[]> = await res.json().catch(() => ({
     success: false,
     message: `HTTP ${res.status}`,
-    data: null as unknown as SpringPage<MenuItemResponse>,
+    data: null as unknown as MenuItemResponse[],
     timestamp: new Date().toISOString(),
   }));
 
@@ -314,7 +302,7 @@ export async function getMenuItems(restaurantId: string, page: number = 0, pageS
     throw new Error(json.message ?? `Failed to fetch menu items with status ${res.status}`);
   }
 
-  return json.data?.content || [];
+  return json.data || [];
 }
 
 /**
