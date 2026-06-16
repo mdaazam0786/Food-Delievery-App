@@ -24,11 +24,13 @@ public class CorsGlobalConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // Allow all frontend dev origins and production
-        config.setAllowedOrigins(List.of(
+        // Use patterns to support Vercel preview URLs like https://food-delievery-app-b6b3-*.vercel.app
+        config.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
                 "http://localhost:3001",
                 "http://localhost:4200",
-                "https://food-delievery-app-b6b3.vercel.app"
+                "https://food-delievery-app-b6b3.vercel.app",
+                "https://food-delievery-app-b6b3-.*\\.vercel\\.app"  // Regex pattern for Vercel preview URLs
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

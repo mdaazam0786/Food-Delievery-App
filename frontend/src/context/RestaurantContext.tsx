@@ -23,7 +23,7 @@ export interface RestaurantContextValue {
   isProvisioned:        boolean;
   profileError:         string | null;
   refetch:              () => Promise<void>;
-  completeProvisioning: (restaurantId: string, restaurantName?: string) => void;
+  completeProvisioning: (restaurantId: string, restaurantName?: string) => Promise<void>;
   setRestaurantStatus:  (status: 'OPEN' | 'CLOSED') => void;
 }
 
@@ -91,9 +91,9 @@ export const RestaurantProvider: React.FC<{ children: ReactNode }> = ({ children
     }
   }, [applyRestaurantState]);
 
-  const completeProvisioning = useCallback(() => {
+  const completeProvisioning = useCallback(async () => {
     // After provisioning, refetch to verify the restaurant was created
-    loadProfile();
+    await loadProfile();
   }, [loadProfile]);
 
   const setRestaurantStatus = useCallback((status: 'OPEN' | 'CLOSED') => {

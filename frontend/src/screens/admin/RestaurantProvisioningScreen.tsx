@@ -220,14 +220,13 @@ const RestaurantProvisioningScreen: React.FC = () => {
         fssaiNo:     form.fssaiNo.trim(),
       });
 
-      completeProvisioning(created.id, created.name);
+      await completeProvisioning();
       setSuccess(true);
 
-      // Short delay so the success label is visible, then navigate.
-      // completeProvisioning() will refetch the restaurant data, then navigate.
+      // Short delay so the success label is visible, then navigate
       setTimeout(() => {
         navigate('/admin', { replace: true });
-      }, 800);
+      }, 300);
     } catch (err: unknown) {
       setSubmitError(
         err instanceof Error ? err.message : 'Failed to provision restaurant. Please try again.',
