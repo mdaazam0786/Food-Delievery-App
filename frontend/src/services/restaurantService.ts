@@ -74,7 +74,13 @@ export interface RestaurantResponse {
   latitude:    number;
   longitude:   number;
   imageUrl:    string;
+  imagePublicId?: string;
   status:      string;
+  gstNo?:      string;
+  fssaiNo?:    string;
+  rating?:     number;
+  totalRatings?: number;
+  discount?:   string;
   createdAt:   string;
   updatedAt:   string;
 }
