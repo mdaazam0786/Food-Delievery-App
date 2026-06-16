@@ -161,15 +161,13 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public List<MenuItemResponse> getMenuItemsByOwner(String restaurantId, String ownerEmail) {
+    public org.springframework.data.domain.Page<MenuItemResponse> getMenuItemsByOwner(String restaurantId, String ownerEmail, org.springframework.data.domain.Pageable pageable) {
         // Verify the restaurant exists and belongs to this owner
         findAndVerifyOwner(restaurantId, ownerEmail);
         
-        // Return all menu items for this restaurant (including unavailable ones for admin editing)
-        return menuItemRepository.findAllByRestaurantId(restaurantId)
-                .stream()
-                .map(this::toMenuItemResponse)
-                .collect(Collectors.toList());
+        // Use repository's paginated query
+        return menuItemRepository.findAllByRestaurantId(restaurantId, pageable)
+                .map(this::toMenuItemResponse);
     }
 
     // ── Public ────────────────────────────────────────────────────────────────

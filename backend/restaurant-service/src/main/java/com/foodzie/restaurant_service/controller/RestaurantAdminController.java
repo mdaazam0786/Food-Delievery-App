@@ -85,17 +85,20 @@ public class RestaurantAdminController {
 
     /**
      * GET /api/admin/restaurants/{restaurantId}/menu
-     * Fetches all menu items for the owner's restaurant.
+     * Fetches paginated menu items for the owner's restaurant.
      * Verifies that the caller owns the restaurant.
+     * 
+     * Query params: ?page=0&size=20&sort=id,desc
      */
     @GetMapping("/{restaurantId}/menu")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_RESTAURANT')")
-    public ResponseEntity<ApiResponse<java.util.List<MenuItemResponse>>> getMenuItemsByOwner(
+    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<MenuItemResponse>>> getMenuItemsByOwner(
             @AuthenticationPrincipal Jwt jwt,
-            @PathVariable String restaurantId) {
+            @PathVariable String restaurantId,
+            org.springframework.data.domain.Pageable pageable) {
         String ownerEmail = jwt.getSubject();
-        java.util.List<MenuItemResponse> items = restaurantService.getMenuItemsByOwner(restaurantId, ownerEmail);
-        return ResponseEntity.ok(ApiResponse.ok(items));
+        org.springframework.data.domain.Page<MenuItemResponse> response = restaurantService.getMenuItemsByOwner(restaurantId, ownerEmail, pageable);
+        return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     /**
