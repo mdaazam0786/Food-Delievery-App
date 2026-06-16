@@ -4,6 +4,8 @@ import com.foodzie.auth_service.event.UserRegisteredEvent;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.common.config.SaslConfigs;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +23,15 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    @Value("${spring.kafka.security.protocol}")
+    private String securityProtocol;
+
+    @Value("${spring.kafka.sasl.mechanism}")
+    private String saslMechanism;
+
+    @Value("${spring.kafka.sasl.jaas.config}")
+    private String saslJaasConfig;
+
     @Bean
     public ProducerFactory<String, UserRegisteredEvent> userRegisteredProducerFactory() {
         Map<String, Object> props = new HashMap<>();
@@ -32,6 +43,10 @@ public class KafkaProducerConfig {
         // Reliable delivery: wait for all in-sync replicas to ack
         props.put(ProducerConfig.ACKS_CONFIG, "all");
         props.put(ProducerConfig.RETRIES_CONFIG, 3);
+        // SASL configuration from environment variables
+        props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, securityProtocol);
+        props.put(SaslConfigs.SASL_MECHANISM, saslMechanism);
+        props.put(SaslConfigs.SASL_JAAS_CONFIG, saslJaasConfig);
         return new DefaultKafkaProducerFactory<>(props);
     }
 
