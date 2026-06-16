@@ -296,6 +296,8 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .longitude(r.getLongitude())
                 .imageUrl(r.getImageUrl())
                 .imagePublicId(r.getImagePublicId())
+                .gstNo(r.getGstNo())
+                .fssaiNo(r.getFssaiNo())
                 .status(r.getStatus())
                 .rating(r.getRating())
                 .totalRatings(r.getTotalRatings())

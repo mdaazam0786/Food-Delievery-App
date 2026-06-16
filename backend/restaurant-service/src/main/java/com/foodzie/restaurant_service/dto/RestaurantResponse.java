@@ -18,6 +18,8 @@ public class RestaurantResponse {
     private double longitude;
     private String imageUrl;
     private String imagePublicId;
+    private String gstNo;
+    private String fssaiNo;
     private RestaurantStatus status;
     private Double rating;
     private Integer totalRatings;
