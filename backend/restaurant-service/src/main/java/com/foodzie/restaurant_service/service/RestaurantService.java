@@ -20,6 +20,8 @@ public interface RestaurantService {
 
     MenuItemResponse updateMenuItem(String restaurantId, String itemId, String ownerEmail, UpdateMenuItemRequest request);
 
+    List<MenuItemResponse> getMenuItemsByOwner(String restaurantId, String ownerEmail);
+
     // ── Public (app users / other services) ──────────────────────────────────
 
     RestaurantResponse getRestaurant(String restaurantId);

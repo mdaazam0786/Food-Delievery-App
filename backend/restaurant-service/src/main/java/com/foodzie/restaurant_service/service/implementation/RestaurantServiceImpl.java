@@ -160,6 +160,18 @@ public class RestaurantServiceImpl implements RestaurantService {
         return toMenuItemResponse(saved);
     }
 
+    @Override
+    public List<MenuItemResponse> getMenuItemsByOwner(String restaurantId, String ownerEmail) {
+        // Verify the restaurant exists and belongs to this owner
+        findAndVerifyOwner(restaurantId, ownerEmail);
+        
+        // Return all menu items for this restaurant (including unavailable ones for admin editing)
+        return menuItemRepository.findAllByRestaurantId(restaurantId)
+                .stream()
+                .map(this::toMenuItemResponse)
+                .collect(Collectors.toList());
+    }
+
     // ── Public ────────────────────────────────────────────────────────────────
 
     @Override

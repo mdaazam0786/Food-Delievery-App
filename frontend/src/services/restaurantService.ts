@@ -277,10 +277,32 @@ export async function getRestaurantDetails(restaurantId: string): Promise<Restau
 }
 
 /**
- * GET /api/restaurants/{restaurantId}/menu
- * Gets all available menu items for a restaurant (public endpoint, no auth required).
+ * GET /api/admin/restaurants/{restaurantId}/menu
+ * Gets all menu items for the owner's restaurant (admin endpoint - requires auth).
  */
 export async function getMenuItems(restaurantId: string): Promise<MenuItemResponse[]> {
+  const res = await authFetch(`${BASE_URL}/api/admin/restaurants/${restaurantId}/menu`);
+
+  const json: ApiResponse<MenuItemResponse[]> = await res.json().catch(() => ({
+    success: false,
+    message: `HTTP ${res.status}`,
+    data: null as unknown as MenuItemResponse[],
+    timestamp: new Date().toISOString(),
+  }));
+
+  if (!res.ok || !json.success) {
+    throw new Error(json.message ?? `Failed to fetch menu items with status ${res.status}`);
+  }
+
+  return json.data || [];
+}
+
+/**
+ * GET /api/restaurants/{restaurantId}/menu
+ * Gets all available menu items for a restaurant (public endpoint, no auth required).
+ * Used by customers viewing the restaurant menu.
+ */
+export async function getPublicMenuItems(restaurantId: string): Promise<MenuItemResponse[]> {
   const res = await fetch(`${BASE_URL}/api/restaurants/${restaurantId}/menu`);
 
   const json: ApiResponse<MenuItemResponse[]> = await res.json().catch(() => ({

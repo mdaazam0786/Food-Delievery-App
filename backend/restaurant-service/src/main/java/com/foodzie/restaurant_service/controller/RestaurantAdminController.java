@@ -84,6 +84,21 @@ public class RestaurantAdminController {
     }
 
     /**
+     * GET /api/admin/restaurants/{restaurantId}/menu
+     * Fetches all menu items for the owner's restaurant.
+     * Verifies that the caller owns the restaurant.
+     */
+    @GetMapping("/{restaurantId}/menu")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_RESTAURANT')")
+    public ResponseEntity<ApiResponse<java.util.List<MenuItemResponse>>> getMenuItemsByOwner(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable String restaurantId) {
+        String ownerEmail = jwt.getSubject();
+        java.util.List<MenuItemResponse> items = restaurantService.getMenuItemsByOwner(restaurantId, ownerEmail);
+        return ResponseEntity.ok(ApiResponse.ok(items));
+    }
+
+    /**
      * POST /api/admin/restaurants/{restaurantId}/menu
      * Adds a new item to the restaurant's menu.
      */
