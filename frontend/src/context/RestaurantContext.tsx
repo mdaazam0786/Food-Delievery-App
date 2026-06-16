@@ -36,7 +36,7 @@ export const RestaurantContext = createContext<RestaurantContextValue>({
   isProvisioned:        false,
   profileError:         null,
   refetch:              async () => {},
-  completeProvisioning: () => {},
+  completeProvisioning: async () => {},
   setRestaurantStatus:  () => {},
 });
 

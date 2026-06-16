@@ -220,7 +220,9 @@ const RestaurantProvisioningScreen: React.FC = () => {
         fssaiNo:     form.fssaiNo.trim(),
       });
 
-      await completeProvisioning();
+      // completeProvisioning will refetch the restaurant data
+      // The parameters are unused since completeProvisioning calls loadProfile()
+      await completeProvisioning(created.id, created.name);
       setSuccess(true);
 
       // Short delay so the success label is visible, then navigate
