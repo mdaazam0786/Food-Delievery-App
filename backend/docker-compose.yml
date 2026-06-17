@@ -64,24 +64,47 @@ services:
     command: redis-server --notify-keyspace-events Ex
 
   # --- EVENT STREAMING (Kafka) ---
-  # Single-node KRaft version (no Zookeeper needed) to save RAM
+  # Using confluentinc/cp-kafka with Zookeeper for better Railway compatibility
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SYNC_LIMIT: 5
+      ZOOKEEPER_INIT_LIMIT: 10
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   kafka:
-    image: apache/kafka:latest
+    image: confluentinc/cp-kafka:7.6.0
     ports:
       - "9092:9092"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
     environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,PLAINTEXT_HOST://:29092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
       # driver-location-pings needs more partitions for parallel zone processing
       # Other topics use the default (1 partition for dev)
       # delivery-events carries: DeliveryMatchingEvent, DeliveryPartnerAssignedEvent, OfferExpiredEvent
       KAFKA_CREATE_TOPICS: "driver-location-pings:8:1,order-events:1:1,payment-events:1:1,restaurant-events:1:1,delivery-events:1:1"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      start-period: 15s
+      retries: 5
 
   # --- SEARCH ENGINE (Elasticsearch) ---
   elasticsearch:
