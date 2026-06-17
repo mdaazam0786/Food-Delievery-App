@@ -64,15 +64,13 @@ services:
     command: redis-server --notify-keyspace-events Ex
 
   # --- EVENT STREAMING (Kafka) ---
-  # Using confluentinc/cp-kafka with Zookeeper for better Railway compatibility
+  # Using bitnami/kafka with Zookeeper for Railway compatibility
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.6.0
+    image: bitnami/zookeeper:latest
     ports:
       - "2181:2181"
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SYNC_LIMIT: 5
-      ZOOKEEPER_INIT_LIMIT: 10
+      ALLOW_ANONYMOUS_LOGIN: "yes"
     healthcheck:
       test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
       interval: 10s
@@ -80,7 +78,7 @@ services:
       retries: 5
 
   kafka:
-    image: confluentinc/cp-kafka:7.6.0
+    image: bitnami/kafka:latest
     ports:
       - "9092:9092"
     depends_on:
