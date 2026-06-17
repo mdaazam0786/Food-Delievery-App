@@ -63,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             role = UserRole.valueOf(roleName);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid role: " + roleName + ". Must be ROLE_USER, ROLE_RESTAURANT, or ROLE_DRIVER");
+            throw new IllegalArgumentException("Invalid role: " + roleName + ". Must be ROLE_USER, ROLE_RESTAURANT, ROLE_DRIVER, or ROLE_ADMIN");
         }
 
         User user = User.builder()
