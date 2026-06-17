@@ -10,7 +10,7 @@ public class ExcelParsingUtil {
 
     /**
      * Parse restaurants from Excel file.
-     * Expected columns: name, description, addressText, latitude, longitude, gstNo, fssaiNo, ownerEmail
+     * Expected columns: name, description, addressText, latitude, longitude, gstNo, fssaiNo, ownerEmail, imageUrl
      */
     public static List<Map<String, String>> parseRestaurantExcel(MultipartFile file) throws IOException {
         List<Map<String, String>> restaurants = new ArrayList<>();
@@ -36,7 +36,8 @@ public class ExcelParsingUtil {
                 restaurantData.put("longitude", getCellValue(row, columnMap, "longitude"));
                 restaurantData.put("gstNo", getCellValue(row, columnMap, "gstNo"));
                 restaurantData.put("fssaiNo", getCellValue(row, columnMap, "fssaiNo"));
-                restaurantData.put("ownerEmail", getCellValue(row, columnMap, "ownerEmail"));
+                restaurantData.put("ownerEmail", getCellValue(row, columnMap, "owneremail"));
+                restaurantData.put("imageUrl", getCellValue(row, columnMap, "imageUrl"));
                 
                 restaurants.add(restaurantData);
             }
@@ -47,7 +48,7 @@ public class ExcelParsingUtil {
 
     /**
      * Parse menu items from Excel file.
-     * Expected columns: name, description, price, category, isVeg
+     * Expected columns: name, description, price, category, isVeg, imageUrl
      */
     public static List<Map<String, String>> parseMenuExcel(MultipartFile file) throws IOException {
         List<Map<String, String>> menuItems = new ArrayList<>();
@@ -71,6 +72,7 @@ public class ExcelParsingUtil {
                 itemData.put("price", getCellValue(row, columnMap, "price"));
                 itemData.put("category", getCellValue(row, columnMap, "category"));
                 itemData.put("isVeg", getCellValue(row, columnMap, "isVeg"));
+                itemData.put("imageUrl", getCellValue(row, columnMap, "imageurl"));
                 
                 menuItems.add(itemData);
             }
