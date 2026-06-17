@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -40,6 +41,7 @@ public class BulkImportController {
      * - gstNo (required) — format: 22AAAAA0000A1Z5
      * - fssaiNo (required) — 14 digits
      * - ownerEmail (required) — must be unique
+     * - imageUrl (optional) — restaurant banner image URL
      */
     @PostMapping("/restaurants")
     public ResponseEntity<ApiResponse<BulkRestaurantImportResponse>> importRestaurants(
@@ -101,6 +103,12 @@ public class BulkImportController {
                     request.setGstNo(gstNo);
                     request.setFssaiNo(fssaiNo);
                     
+                    // Set image URL if provided
+                    String imageUrl = data.get("imageUrl");
+                    if (imageUrl != null && !imageUrl.isEmpty()) {
+                        request.setImageUrl(imageUrl);
+                    }
+                    
                     // Note: In a real scenario, ownerEmail would be set by the service based on JWT subject
                     // For now, we use the createRestaurant method which uses JWT subject
                     RestaurantResponse response = restaurantService.createRestaurant(ownerEmail, request);
@@ -139,11 +147,17 @@ public class BulkImportController {
         } catch (IOException e) {
             log.error("Error reading Excel file: ", e);
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Error reading Excel file: " + e.getMessage()));
+                    .body(ApiResponse.<BulkRestaurantImportResponse>builder()
+                            .success(false)
+                            .message("Error reading Excel file: " + e.getMessage())
+                            .build());
         } catch (Exception e) {
             log.error("Error importing restaurants: ", e);
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Error importing restaurants: " + e.getMessage()));
+                    .body(ApiResponse.<BulkRestaurantImportResponse>builder()
+                            .success(false)
+                            .message("Error importing restaurants: " + e.getMessage())
+                            .build());
         }
     }
 
@@ -157,6 +171,7 @@ public class BulkImportController {
      * - price (required) — numeric
      * - category (required) — e.g., "Burger", "Pizza", "Drinks"
      * - isVeg (required) — "true" or "false"
+     * - imageUrl (optional) — image URL
      */
     @PostMapping("/menu/{restaurantId}")
     public ResponseEntity<ApiResponse<BulkMenuImportResponse>> importMenu(
@@ -207,9 +222,15 @@ public class BulkImportController {
                     AddMenuItemRequest request = new AddMenuItemRequest();
                     request.setName(name);
                     request.setDescription(data.get("description") != null ? data.get("description") : "");
-                    request.setPrice(priceInt);
+                    request.setPrice(new BigDecimal(price));
                     request.setCategory(category);
                     request.setVeg(isVegBool);
+                    
+                    // Set image URL if provided
+                    String imageUrl = data.get("imageUrl");
+                    if (imageUrl != null && !imageUrl.isEmpty()) {
+                        request.setImageUrl(imageUrl);
+                    }
                     
                     // Note: In a real scenario, you'd extract ownerEmail from JWT
                     // For now, using empty string as placeholder
@@ -250,11 +271,17 @@ public class BulkImportController {
         } catch (IOException e) {
             log.error("Error reading Excel file: ", e);
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Error reading Excel file: " + e.getMessage()));
+                    .body(ApiResponse.<BulkMenuImportResponse>builder()
+                            .success(false)
+                            .message("Error reading Excel file: " + e.getMessage())
+                            .build());
         } catch (Exception e) {
             log.error("Error importing menu items: ", e);
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Error importing menu items: " + e.getMessage()));
+                    .body(ApiResponse.<BulkMenuImportResponse>builder()
+                            .success(false)
+                            .message("Error importing menu items: " + e.getMessage())
+                            .build());
         }
     }
 }
