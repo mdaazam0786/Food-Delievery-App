@@ -24,4 +24,7 @@ public interface AuthService {
 
     /** Called by OAuth2 success handler to persist a refresh token */
     String createRefreshToken(UserPrincipal principal, HttpServletRequest request);
+
+    /** Bulk register multiple users (admin only) */
+    BulkUserImportResponse bulkRegister(BulkUserImportRequest request);
 }

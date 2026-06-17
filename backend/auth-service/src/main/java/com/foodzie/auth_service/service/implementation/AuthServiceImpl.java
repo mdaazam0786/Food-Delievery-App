@@ -29,9 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -249,6 +247,124 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         refreshTokenRepository.save(refreshToken);
         return rawToken;
+    }
+
+    @Override
+    @Transactional
+    public BulkUserImportResponse bulkRegister(BulkUserImportRequest request) {
+        List<BulkUserImportResponse.UserImportResult> results = new ArrayList<>();
+        int successCount = 0;
+        int failureCount = 0;
+
+        if (request.getUsers() == null || request.getUsers().isEmpty()) {
+            return BulkUserImportResponse.builder()
+                    .totalUsers(0)
+                    .successCount(0)
+                    .failureCount(0)
+                    .results(new ArrayList<>())
+                    .build();
+        }
+
+        for (int index = 0; index < request.getUsers().size(); index++) {
+            BulkUserImportRequest.UserImportData userData = request.getUsers().get(index);
+            int rowNumber = index + 1;
+
+            try {
+                // Validate required fields
+                if (userData.getEmail() == null || userData.getEmail().isBlank()) {
+                    throw new IllegalArgumentException("Email is required");
+                }
+                if (userData.getUsername() == null || userData.getUsername().isBlank()) {
+                    throw new IllegalArgumentException("Username is required");
+                }
+                if (userData.getPassword() == null || userData.getPassword().isBlank()) {
+                    throw new IllegalArgumentException("Password is required");
+                }
+                if (userData.getPassword().length() < 8) {
+                    throw new IllegalArgumentException("Password must be at least 8 characters");
+                }
+
+                // Check if email already exists
+                if (userRepository.existsByEmail(userData.getEmail())) {
+                    throw new IllegalArgumentException("Email already registered: " + userData.getEmail());
+                }
+
+                // Check if username already exists
+                if (userRepository.existsByUsername(userData.getUsername())) {
+                    throw new IllegalArgumentException("Username already taken: " + userData.getUsername());
+                }
+
+                // Validate role
+                String roleName = (userData.getRole() != null && !userData.getRole().isBlank())
+                        ? userData.getRole()
+                        : "ROLE_USER";
+                UserRole role;
+                try {
+                    role = UserRole.valueOf(roleName);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Invalid role: " + roleName + ". Must be ROLE_USER, ROLE_RESTAURANT, ROLE_DRIVER, or ROLE_ADMIN");
+                }
+
+                // Create user
+                User user = User.builder()
+                        .email(userData.getEmail())
+                        .username(userData.getUsername())
+                        .passwordHash(passwordEncoder.encode(userData.getPassword()))
+                        .fullName(userData.getFullName() != null ? userData.getFullName() : "")
+                        .role(role)
+                        .status(UserStatus.ACTIVE)
+                        .emailVerified(false)
+                        .build();
+
+                userRepository.save(user);
+
+                // Log audit
+                auditService.log(user.getId(), user.getEmail(), "BULK_USER_REGISTER", "User",
+                        String.valueOf(user.getId()), null, null,
+                        AuditLog.AuditStatus.SUCCESS, Map.of("username", user.getUsername(), "role", role.name()));
+
+                // Publish Kafka event so user-service and restaurant-service can process
+                UserRegisteredEvent event = UserRegisteredEvent.builder()
+                        .userId(user.getId())
+                        .email(user.getEmail())
+                        .fullName(user.getFullName())
+                        .role(user.getRole().name())
+                        .build();
+                userEventPublisher.publishUserRegistered(event);
+
+                // Add success result
+                results.add(BulkUserImportResponse.UserImportResult.builder()
+                        .rowNumber(rowNumber)
+                        .email(userData.getEmail())
+                        .username(userData.getUsername())
+                        .status("SUCCESS")
+                        .message("User created successfully")
+                        .userId(user.getId())
+                        .build());
+
+                successCount++;
+                log.info("Successfully registered user: {} with role: {}", userData.getUsername(), role);
+
+            } catch (Exception e) {
+                failureCount++;
+                results.add(BulkUserImportResponse.UserImportResult.builder()
+                        .rowNumber(rowNumber)
+                        .email(userData.getEmail() != null ? userData.getEmail() : "Unknown")
+                        .username(userData.getUsername() != null ? userData.getUsername() : "Unknown")
+                        .status("FAILED")
+                        .message(e.getMessage())
+                        .build());
+
+                log.warn("Failed to register user at row {}: {}", rowNumber, e.getMessage());
+            }
+        }
+
+        return BulkUserImportResponse.builder()
+                .totalUsers(request.getUsers().size())
+                .successCount(successCount)
+                .failureCount(failureCount)
+                .results(results)
+                .build();
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
