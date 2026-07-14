@@ -55,7 +55,7 @@ public class AuthController {
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody RefreshTokenRequest request) {
-        Long userId = SecurityUtils.getCurrentUserId();
+        String userId = SecurityUtils.getCurrentUserId();
         authService.logout(request.getRefreshToken(), userId);
         return ResponseEntity.ok(ApiResponse.ok("Logged out successfully", null));
     }
@@ -64,7 +64,7 @@ public class AuthController {
     @PostMapping("/logout-all")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> logoutAll() {
-        Long userId = SecurityUtils.getCurrentUserId();
+        String userId = SecurityUtils.getCurrentUserId();
         authService.logoutAll(userId);
         return ResponseEntity.ok(ApiResponse.ok("All sessions terminated", null));
     }

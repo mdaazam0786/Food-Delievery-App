@@ -12,9 +12,9 @@ public interface AuthService {
 
     AuthResponse refreshToken(RefreshTokenRequest request, HttpServletRequest httpRequest);
 
-    void logout(String refreshToken, Long userId);
+    void logout(String refreshToken, String userId);
 
-    void logoutAll(Long userId);
+    void logoutAll(String userId);
 
     void initiatePasswordReset(PasswordResetRequest request);
 

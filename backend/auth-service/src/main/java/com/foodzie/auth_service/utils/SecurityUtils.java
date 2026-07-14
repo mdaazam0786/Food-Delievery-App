@@ -19,7 +19,7 @@ public final class SecurityUtils {
         return Optional.empty();
     }
 
-    public static Long getCurrentUserId() {
+    public static String getCurrentUserId() {
         return getCurrentUser()
                 .map(UserPrincipal::getId)
                 .orElseThrow(() -> new IllegalStateException("No authenticated user in context"));

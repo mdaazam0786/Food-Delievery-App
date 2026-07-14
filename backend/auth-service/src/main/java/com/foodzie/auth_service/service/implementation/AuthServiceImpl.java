@@ -189,10 +189,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void logoutAll(Long userId) {
-        refreshTokenRepository.deleteByUserId(userId.toString());
-        auditService.log(userId.toString(), null, "USER_LOGOUT_ALL", "User",
-                userId.toString(), null, null, AuditLog.AuditStatus.SUCCESS, null);
+    public void logoutAll(String userId) {
+        refreshTokenRepository.deleteByUserId(userId);
+        auditService.log(userId, null, "USER_LOGOUT_ALL", "User",
+                userId, null, null, AuditLog.AuditStatus.SUCCESS, null);
     }
 
     @Override

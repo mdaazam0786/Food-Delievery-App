@@ -13,7 +13,7 @@ public class AuthResponse {
     private String refreshToken;
     private String tokenType;
     private long expiresIn;          // seconds
-    private Long userId;
+    private String userId;
     private String email;
     private String username;
     private Set<String> roles;

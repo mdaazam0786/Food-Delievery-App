@@ -74,7 +74,7 @@ public class JwtTokenProvider {
     }
 
     /** Short-lived MFA challenge token – not a full access token */
-    public String generateMfaChallengeToken(Long userId, String email) {
+    public String generateMfaChallengeToken(String userId, String email) {
         return Jwts.builder()
                 .id(UUID.randomUUID().toString())
                 .issuer(issuer)
@@ -117,8 +117,8 @@ public class JwtTokenProvider {
         return parseToken(token).getSubject();
     }
 
-    public Long getUserIdFromToken(String token) {
-        return parseToken(token).get("userId", Long.class);
+    public String getUserIdFromToken(String token) {
+        return parseToken(token).get("userId", String.class);
     }
 
     public String getTokenType(String token) {

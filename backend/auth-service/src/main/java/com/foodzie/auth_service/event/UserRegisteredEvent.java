@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class UserRegisteredEvent {
 
     /** auth-service users.id */
-    private Long userId;
+    private String userId;
 
     private String email;
 

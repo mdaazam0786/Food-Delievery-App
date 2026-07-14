@@ -28,6 +28,6 @@ public class BulkUserImportResponse {
         private String username;
         private String status; // SUCCESS, FAILED, SKIPPED
         private String message;
-        private Long userId; // only present on success
+        private String userId; // only present on success
     }
 }
