@@ -1,12 +1,12 @@
 package com.foodzie.auth_service.data;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "mfa_tokens")
+@Document(collection = "mfa_tokens")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,34 +15,20 @@ import java.time.LocalDateTime;
 public class MfaToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private String userId;
 
-    @Column(nullable = false, length = 10)
     private String token;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private MfaTokenType type;
 
-    @Column(nullable = false)
     @Builder.Default
     private boolean used = false;
 
-    @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(expiresAt);

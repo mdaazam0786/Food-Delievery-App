@@ -2,24 +2,22 @@ package com.foodzie.delivery_acceptance_service.repository;
 
 import com.foodzie.delivery_acceptance_service.data.DeliveryPartner;
 import com.foodzie.delivery_acceptance_service.data.DriverStatus;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Update;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DeliveryPartnerRepository extends JpaRepository<DeliveryPartner, String> {
+public interface DeliveryPartnerRepository extends MongoRepository<DeliveryPartner, String> {
 
     /**
      * Targeted status update — avoids loading the full entity just to flip one field.
      * Called after a driver wins the distributed lock.
      */
-    @Modifying
-    @Query("UPDATE DeliveryPartner d SET d.currentStatus = :newStatus WHERE d.id = :driverId AND d.currentStatus = :expectedStatus")
-    int updateStatusIfExpected(
-            @Param("driverId") String driverId,
-            @Param("expectedStatus") DriverStatus expectedStatus,
-            @Param("newStatus") DriverStatus newStatus
+    @Update("{ '$set': { 'currentStatus': ?1 } }")
+    void updateStatusIfExpected(
+            String driverId,
+            DriverStatus newStatus
     );
 }
