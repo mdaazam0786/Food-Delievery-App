@@ -14,7 +14,7 @@ import java.util.Map;
 @Getter
 public class UserPrincipal implements UserDetails, OAuth2User {
 
-    private final Long id;
+    private final String id;
     private final String email;
     private final String username;
     private final String password;

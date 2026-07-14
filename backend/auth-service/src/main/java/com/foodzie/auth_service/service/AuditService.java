@@ -9,11 +9,11 @@ import java.util.Map;
 
 public interface AuditService {
 
-    void log(Long userId, String actorEmail, String action, String resource,
+    void log(String userId, String actorEmail, String action, String resource,
              String resourceId, String ipAddress, String userAgent,
              AuditStatus status, Map<String, Object> details);
 
-    Page<AuditLog> getLogsByUser(Long userId, Pageable pageable);
+    Page<AuditLog> getLogsByUser(String userId, Pageable pageable);
 
     Page<AuditLog> getLogsByAction(String action, Pageable pageable);
 }

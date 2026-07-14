@@ -20,7 +20,7 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     @Async
-    public void log(Long userId, String actorEmail, String action, String resource,
+    public void log(String userId, String actorEmail, String action, String resource,
                     String resourceId, String ipAddress, String userAgent,
                     AuditStatus status, Map<String, Object> details) {
         AuditLog log = AuditLog.builder()
@@ -38,7 +38,7 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
-    public Page<AuditLog> getLogsByUser(Long userId, Pageable pageable) {
+    public Page<AuditLog> getLogsByUser(String userId, Pageable pageable) {
         return auditLogRepository.findByUserId(userId, pageable);
     }
 

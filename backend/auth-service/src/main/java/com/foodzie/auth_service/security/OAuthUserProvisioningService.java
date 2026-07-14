@@ -25,14 +25,16 @@ public class OAuthUserProvisioningService {
                 oAuthConnectionRepository.findByProviderAndProviderUserId(provider, userInfo.getId());
 
         if (existingConnection.isPresent()) {
-            return existingConnection.get().getUser();
+            OAuthConnection conn = existingConnection.get();
+            return userRepository.findById(conn.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
         }
 
         Optional<User> existingUser = userRepository.findByEmail(userInfo.getEmail());
         User user = existingUser.orElseGet(() -> provisionNewOAuthUser(userInfo));
 
         OAuthConnection connection = OAuthConnection.builder()
-                .user(user)
+                .userId(user.getId())
                 .provider(provider)
                 .providerUserId(userInfo.getId())
                 .build();

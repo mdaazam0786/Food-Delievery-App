@@ -12,7 +12,6 @@ import com.foodzie.auth_service.service.AuditService;
 import com.foodzie.auth_service.service.AuthService;
 import com.foodzie.auth_service.service.MfaService;
 import com.foodzie.auth_service.utils.SecurityUtils;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +75,7 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         auditService.log(user.getId(), user.getEmail(), "USER_REGISTER", "User",
-                String.valueOf(user.getId()), null, null,
+                user.getId(), null, null,
                 AuditLog.AuditStatus.SUCCESS, Map.of("username", user.getUsername()));
 
         // Publish Kafka event so user-service can eagerly create the profile
@@ -102,13 +101,13 @@ public class AuthServiceImpl implements AuthService {
 
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
         User user = userRepository.findById(principal.getId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         user.setLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
 
         auditService.log(user.getId(), user.getEmail(), "USER_LOGIN", "User",
-                String.valueOf(user.getId()), SecurityUtils.getClientIp(httpRequest),
+                user.getId(), SecurityUtils.getClientIp(httpRequest),
                 httpRequest.getHeader("User-Agent"), AuditLog.AuditStatus.SUCCESS, null);
 
         // If MFA is enabled, return a challenge token instead of a full access token
@@ -137,16 +136,16 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("Invalid challenge token type");
         }
 
-        Long userId = tokenProvider.getUserIdFromToken(request.getChallengeToken());
+        String userId = tokenProvider.getUserIdFromToken(request.getChallengeToken());
         mfaService.verifyEmailOtp(userId, request.getOtpCode());
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         UserPrincipal principal = new UserPrincipal(user);
         String refreshToken = createRefreshToken(principal, httpRequest);
 
         auditService.log(userId, user.getEmail(), "MFA_VERIFY", "User",
-                String.valueOf(userId), SecurityUtils.getClientIp(httpRequest),
+                userId, SecurityUtils.getClientIp(httpRequest),
                 httpRequest.getHeader("User-Agent"), AuditLog.AuditStatus.SUCCESS, null);
 
         return buildAuthResponse(principal, refreshToken);
@@ -163,7 +162,8 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("Refresh token expired or revoked");
         }
 
-        User user = stored.getUser();
+        User user = userRepository.findById(stored.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         UserPrincipal principal = new UserPrincipal(user);
         String newAccessToken = tokenProvider.generateAccessToken(principal);
 
@@ -177,22 +177,22 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void logout(String refreshToken, Long userId) {
+    public void logout(String refreshToken, String userId) {
         String tokenHash = hashToken(refreshToken);
         refreshTokenRepository.findByTokenHash(tokenHash).ifPresent(rt -> {
             rt.setRevoked(true);
             refreshTokenRepository.save(rt);
         });
         auditService.log(userId, null, "USER_LOGOUT", "User",
-                String.valueOf(userId), null, null, AuditLog.AuditStatus.SUCCESS, null);
+                userId, null, null, AuditLog.AuditStatus.SUCCESS, null);
     }
 
     @Override
     @Transactional
     public void logoutAll(Long userId) {
-        refreshTokenRepository.revokeAllByUserId(userId);
-        auditService.log(userId, null, "USER_LOGOUT_ALL", "User",
-                String.valueOf(userId), null, null, AuditLog.AuditStatus.SUCCESS, null);
+        refreshTokenRepository.deleteByUserId(userId.toString());
+        auditService.log(userId.toString(), null, "USER_LOGOUT_ALL", "User",
+                userId.toString(), null, null, AuditLog.AuditStatus.SUCCESS, null);
     }
 
     @Override
@@ -226,9 +226,9 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         // Revoke all refresh tokens on password change
-        refreshTokenRepository.revokeAllByUserId(user.getId());
+        refreshTokenRepository.deleteByUserId(user.getId());
         auditService.log(user.getId(), user.getEmail(), "PASSWORD_RESET", "User",
-                String.valueOf(user.getId()), null, null, AuditLog.AuditStatus.SUCCESS, null);
+                user.getId(), null, null, AuditLog.AuditStatus.SUCCESS, null);
     }
 
     @Override
@@ -238,7 +238,7 @@ public class AuthServiceImpl implements AuthService {
         String tokenHash = hashToken(rawToken);
 
         RefreshToken refreshToken = RefreshToken.builder()
-                .user(userRepository.getReferenceById(principal.getId()))
+                .userId(principal.getId())
                 .tokenHash(tokenHash)
                 .deviceInfo(request != null ? request.getHeader("User-Agent") : null)
                 .ipAddress(request != null ? SecurityUtils.getClientIp(request) : null)
@@ -320,7 +320,7 @@ public class AuthServiceImpl implements AuthService {
 
                 // Log audit
                 auditService.log(user.getId(), user.getEmail(), "BULK_USER_REGISTER", "User",
-                        String.valueOf(user.getId()), null, null,
+                        user.getId(), null, null,
                         AuditLog.AuditStatus.SUCCESS, Map.of("username", user.getUsername(), "role", role.name()));
 
                 // Publish Kafka event so user-service and restaurant-service can process

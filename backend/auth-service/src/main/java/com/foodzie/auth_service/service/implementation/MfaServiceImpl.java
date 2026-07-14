@@ -4,7 +4,6 @@ import com.foodzie.auth_service.data.*;
 import com.foodzie.auth_service.repository.MfaTokenRepository;
 import com.foodzie.auth_service.repository.UserRepository;
 import com.foodzie.auth_service.service.MfaService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +33,7 @@ public class MfaServiceImpl implements MfaService {
 
     @Override
     @Transactional
-    public String enableTotp(Long userId) {
+    public String enableTotp(String userId) {
         User user = getUser(userId);
         // Generate a random 20-byte TOTP secret
         byte[] secretBytes = new byte[20];
@@ -50,7 +49,7 @@ public class MfaServiceImpl implements MfaService {
 
     @Override
     @Transactional
-    public void confirmTotp(Long userId, String totpCode) {
+    public void confirmTotp(String userId, String totpCode) {
         User user = getUser(userId);
         // In production, validate the TOTP code against user.getMfaSecret()
         // using a library like GoogleAuth or java-otp.
@@ -62,25 +61,26 @@ public class MfaServiceImpl implements MfaService {
 
     @Override
     @Transactional
-    public void disableMfa(Long userId) {
+    public void disableMfa(String userId) {
         User user = getUser(userId);
         user.setMfaEnabled(false);
         user.setMfaSecret(null);
         userRepository.save(user);
-        mfaTokenRepository.invalidateAllByUserAndType(userId, MfaTokenType.EMAIL_OTP);
+        // Delete all EMAIL_OTP tokens for this user
+        mfaTokenRepository.deleteByUserIdAndType(userId, MfaTokenType.EMAIL_OTP);
         log.info("MFA disabled for user {}", userId);
     }
 
     @Override
     @Transactional
-    public void sendEmailOtp(Long userId) {
+    public void sendEmailOtp(String userId) {
         User user = getUser(userId);
         // Invalidate any existing OTPs
-        mfaTokenRepository.invalidateAllByUserAndType(userId, MfaTokenType.EMAIL_OTP);
+        mfaTokenRepository.deleteByUserIdAndType(userId, MfaTokenType.EMAIL_OTP);
 
         String otp = generateNumericOtp(6);
         MfaToken token = MfaToken.builder()
-                .user(user)
+                .userId(userId)
                 .token(otp)
                 .type(MfaTokenType.EMAIL_OTP)
                 .expiresAt(LocalDateTime.now().plusMinutes(otpExpiryMinutes))
@@ -93,7 +93,7 @@ public class MfaServiceImpl implements MfaService {
 
     @Override
     @Transactional
-    public boolean verifyEmailOtp(Long userId, String otp) {
+    public boolean verifyEmailOtp(String userId, String otp) {
         MfaToken token = mfaTokenRepository
                 .findLatestValidToken(userId, MfaTokenType.EMAIL_OTP)
                 .orElseThrow(() -> new BadCredentialsException("No valid OTP found"));
@@ -106,9 +106,9 @@ public class MfaServiceImpl implements MfaService {
         return true;
     }
 
-    private User getUser(Long userId) {
+    private User getUser(String userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
     }
 
     private String generateNumericOtp(int length) {

@@ -13,4 +13,6 @@ public interface MfaTokenRepository extends MongoRepository<MfaToken, String> {
 
     @Query("{ 'userId': ?0, 'type': ?1, 'used': false }")
     Optional<MfaToken> findLatestValidToken(String userId, MfaTokenType type);
+
+    void deleteByUserIdAndType(String userId, MfaTokenType type);
 }
