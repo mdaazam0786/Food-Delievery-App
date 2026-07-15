@@ -55,10 +55,10 @@ public class AddressController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<AddressResponse>> updateAddress(
             @AuthenticationPrincipal Jwt jwt,
-            @PathVariable Long addressId,
+            @PathVariable String addressId,
             @Valid @RequestBody AddressRequest request) {
         String userId = jwt.getClaim("userId");
-        return ResponseEntity.ok(ApiResponse.ok("Address updated", addressService.updateAddress(userId, addressId, request)));
+        return ResponseEntity.ok(ApiResponse.ok("Address updated", addressService.updateAddress(userId, Long.valueOf(addressId), request)));
     }
 
     /**
@@ -69,9 +69,9 @@ public class AddressController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> deleteAddress(
             @AuthenticationPrincipal Jwt jwt,
-            @PathVariable Long addressId) {
+            @PathVariable String addressId) {
         String userId = jwt.getClaim("userId");
-        addressService.deleteAddress(userId, addressId);
+        addressService.deleteAddress(userId, Long.valueOf(addressId));
         return ResponseEntity.ok(ApiResponse.ok("Address deleted", null));
     }
 }
