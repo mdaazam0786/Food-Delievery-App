@@ -21,10 +21,10 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
-    @Value("${spring.kafka.bootstrap-servers}")
+    @Value("${spring.kafka.bootstrap-servers:cp-kafka.railway.internal:9092}")
     private String bootstrapServers;
 
-    @Value("${spring.kafka.consumer.group-id}")
+    @Value("${spring.kafka.consumer.group-id:payment-service-group}")
     private String groupId;
 
     // ── Producer ─────────────────────────────────────────────────────────────
@@ -59,6 +59,10 @@ public class KafkaConfig {
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, OrderCreatedEvent.class.getName());
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
+        // DNS lookup strategy for Railway internal network
+        props.put("client.dns.lookup", "use_all_dns_ips");
+        props.put("reconnect.backoff.ms", 50);
+        props.put("reconnect.backoff.max.ms", 1000);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
