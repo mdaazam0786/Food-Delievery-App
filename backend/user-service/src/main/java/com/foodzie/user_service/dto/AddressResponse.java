@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 public class AddressResponse {
 
-    private Long id;
+    private String id;
     private String formattedAddress;
     private String street;
     private String postCode;
