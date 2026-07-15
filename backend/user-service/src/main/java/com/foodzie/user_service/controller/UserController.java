@@ -30,7 +30,7 @@ public class UserController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<UserResponse>> getMe(@AuthenticationPrincipal Jwt jwt) {
-        Long userId = jwt.getClaim("userId");
+        String userId = jwt.getClaim("userId");
         String email = jwt.getSubject();
         return ResponseEntity.ok(ApiResponse.ok(userService.getMe(userId, email)));
     }
@@ -45,7 +45,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponse>> updateMe(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody UpdateUserRequest request) {
-        Long userId = jwt.getClaim("userId");
+        String userId = jwt.getClaim("userId");
         return ResponseEntity.ok(ApiResponse.ok("Profile updated", userService.updateMe(userId, request)));
     }
 
@@ -59,7 +59,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<AvatarResponse>> uploadAvatar(
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam("file") MultipartFile file) {
-        Long userId = jwt.getClaim("userId");
+        String userId = jwt.getClaim("userId");
         return ResponseEntity.ok(ApiResponse.ok("Avatar uploaded", userService.uploadAvatar(userId, file)));
     }
 }

@@ -23,7 +23,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<AddressResponse> getAddresses(Long userId) {
+    public List<AddressResponse> getAddresses(String userId) {
         UserProfile profile = findProfile(userId);
         return addressRepository.findAllByUserProfile_Id(profile.getId())
                 .stream()
@@ -33,7 +33,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public AddressResponse addAddress(Long userId, AddressRequest request) {
+    public AddressResponse addAddress(String userId, AddressRequest request) {
         UserProfile profile = findProfile(userId);
 
         Address address = Address.builder()
@@ -52,7 +52,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public AddressResponse updateAddress(Long userId, Long addressId, AddressRequest request) {
+    public AddressResponse updateAddress(String userId, Long addressId, AddressRequest request) {
         UserProfile profile = findProfile(userId);
         Address address = addressRepository.findByIdAndUserProfile_Id(addressId, profile.getId())
                 .orElseThrow(() -> new NoSuchElementException("Address not found: " + addressId));
@@ -70,7 +70,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public void deleteAddress(Long userId, Long addressId) {
+    public void deleteAddress(String userId, Long addressId) {
         UserProfile profile = findProfile(userId);
         Address address = addressRepository.findByIdAndUserProfile_Id(addressId, profile.getId())
                 .orElseThrow(() -> new NoSuchElementException("Address not found: " + addressId));
@@ -79,7 +79,7 @@ public class AddressServiceImpl implements AddressService {
 
     // -------------------------------------------------------------------------
 
-    private UserProfile findProfile(Long userId) {
+    private UserProfile findProfile(String userId) {
         return profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new NoSuchElementException("Profile not found for user: " + userId));
     }

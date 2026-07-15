@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse getMe(Long userId, String email) {
+    public UserResponse getMe(String userId, String email) {
         UserProfile profile = profileRepository.findByUserId(userId)
                 .orElseGet(() -> profileRepository.save(
                         UserProfile.builder()
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse updateMe(Long userId, UpdateUserRequest request) {
+    public UserResponse updateMe(String userId, UpdateUserRequest request) {
         UserProfile profile = findProfile(userId);
 
         if (request.getFullName() != null)    profile.setFullName(request.getFullName());
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public AvatarResponse uploadAvatar(Long userId, MultipartFile file) {
+    public AvatarResponse uploadAvatar(String userId, MultipartFile file) {
         UserProfile profile = findProfile(userId);
 
         // Use userId as the stable public ID so re-uploads overwrite the old asset
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
     // -------------------------------------------------------------------------
 
-    private UserProfile findProfile(Long userId) {
+    private UserProfile findProfile(String userId) {
         return profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new NoSuchElementException("Profile not found for user: " + userId));
     }

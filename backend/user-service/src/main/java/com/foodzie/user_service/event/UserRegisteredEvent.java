@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserRegisteredEvent {
 
-    private Long userId;
+    private String userId;
     private String email;
     private String fullName;
 }

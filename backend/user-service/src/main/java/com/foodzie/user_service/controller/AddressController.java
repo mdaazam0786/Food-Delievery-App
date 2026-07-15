@@ -29,7 +29,7 @@ public class AddressController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<AddressResponse>>> getAddresses(@AuthenticationPrincipal Jwt jwt) {
-        Long userId = jwt.getClaim("userId");
+        String userId = jwt.getClaim("userId");
         return ResponseEntity.ok(ApiResponse.ok(addressService.getAddresses(userId)));
     }
 
@@ -42,7 +42,7 @@ public class AddressController {
     public ResponseEntity<ApiResponse<AddressResponse>> addAddress(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody AddressRequest request) {
-        Long userId = jwt.getClaim("userId");
+        String userId = jwt.getClaim("userId");
         AddressResponse response = addressService.addAddress(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok("Address saved", response));
     }
@@ -57,7 +57,7 @@ public class AddressController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long addressId,
             @Valid @RequestBody AddressRequest request) {
-        Long userId = jwt.getClaim("userId");
+        String userId = jwt.getClaim("userId");
         return ResponseEntity.ok(ApiResponse.ok("Address updated", addressService.updateAddress(userId, addressId, request)));
     }
 
@@ -70,7 +70,7 @@ public class AddressController {
     public ResponseEntity<ApiResponse<Void>> deleteAddress(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long addressId) {
-        Long userId = jwt.getClaim("userId");
+        String userId = jwt.getClaim("userId");
         addressService.deleteAddress(userId, addressId);
         return ResponseEntity.ok(ApiResponse.ok("Address deleted", null));
     }
