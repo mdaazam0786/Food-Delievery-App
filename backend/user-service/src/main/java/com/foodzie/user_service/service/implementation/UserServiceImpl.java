@@ -7,12 +7,13 @@ import com.foodzie.user_service.dto.UpdateUserRequest;
 import com.foodzie.user_service.dto.UserResponse;
 import com.foodzie.user_service.service.CloudStorageService;
 import com.foodzie.user_service.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -69,7 +70,7 @@ public class UserServiceImpl implements UserService {
 
     private UserProfile findProfile(Long userId) {
         return profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Profile not found for user: " + userId));
+                .orElseThrow(() -> new NoSuchElementException("Profile not found for user: " + userId));
     }
 
     private UserResponse toResponse(UserProfile p) {

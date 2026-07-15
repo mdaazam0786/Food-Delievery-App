@@ -7,12 +7,12 @@ import com.foodzie.user_service.data.UserProfileRepository;
 import com.foodzie.user_service.dto.AddressRequest;
 import com.foodzie.user_service.dto.AddressResponse;
 import com.foodzie.user_service.service.AddressService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +55,7 @@ public class AddressServiceImpl implements AddressService {
     public AddressResponse updateAddress(Long userId, Long addressId, AddressRequest request) {
         UserProfile profile = findProfile(userId);
         Address address = addressRepository.findByIdAndUserProfile_Id(addressId, profile.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Address not found: " + addressId));
+                .orElseThrow(() -> new NoSuchElementException("Address not found: " + addressId));
 
         address.setFormattedAddress(request.getFormattedAddress());
         address.setStreet(request.getStreet());
@@ -73,7 +73,7 @@ public class AddressServiceImpl implements AddressService {
     public void deleteAddress(Long userId, Long addressId) {
         UserProfile profile = findProfile(userId);
         Address address = addressRepository.findByIdAndUserProfile_Id(addressId, profile.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Address not found: " + addressId));
+                .orElseThrow(() -> new NoSuchElementException("Address not found: " + addressId));
         addressRepository.delete(address);
     }
 
@@ -81,7 +81,7 @@ public class AddressServiceImpl implements AddressService {
 
     private UserProfile findProfile(Long userId) {
         return profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Profile not found for user: " + userId));
+                .orElseThrow(() -> new NoSuchElementException("Profile not found for user: " + userId));
     }
 
     private AddressResponse toResponse(Address a) {
