@@ -1,12 +1,18 @@
 package com.foodzie.payment_service.config;
 
+import com.foodzie.payment_service.event.OrderCreatedEvent;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
+import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
@@ -41,10 +47,7 @@ public class KafkaConfig {
     }
 
     // ── Consumer ─────────────────────────────────────────────────────────────
-    // Disabled: payment-service doesn't have @KafkaListener methods
-    // If listeners are added in the future, uncomment these beans
 
-    /*
     @Bean
     public ConsumerFactory<String, OrderCreatedEvent> orderCreatedConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
@@ -74,7 +77,6 @@ public class KafkaConfig {
         factory.getContainerProperties().setAutoStartup(false);
         return factory;
     }
-    */
 
     // ── Topics ───────────────────────────────────────────────────────────────
 
