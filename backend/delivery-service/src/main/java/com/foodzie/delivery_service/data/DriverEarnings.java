@@ -40,4 +40,13 @@ public class DriverEarnings {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    // Explicit setter to ensure type safety
+    public void setTotalDeliveries(Long totalDeliveries) {
+        this.totalDeliveries = totalDeliveries;
+    }
+
+    public void setActiveDeliveries(Long activeDeliveries) {
+        this.activeDeliveries = activeDeliveries;
+    }
 }
