@@ -77,6 +77,8 @@ public class KafkaConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(orderCreatedConsumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        // Disable auto-startup to prevent connection failures on app startup
+        factory.setAutoStartup(false);
         return factory;
     }
 
