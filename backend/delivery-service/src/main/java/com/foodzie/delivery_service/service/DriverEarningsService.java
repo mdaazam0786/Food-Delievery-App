@@ -35,11 +35,14 @@ public class DriverEarningsService {
         DriverEarnings earnings = earningsRepository.findByDriverId(driverId)
                 .orElseThrow(() -> new DriverNotFoundException("Earnings not found for driver: " + driverId));
 
+        Long totalDeliveries = earnings.getTotalDeliveries() != null ? earnings.getTotalDeliveries() : 0L;
+        Long activeDeliveries = earnings.getActiveDeliveries() != null ? earnings.getActiveDeliveries() : 0L;
+
         return DriverEarningsResponse.builder()
                 .driverId(earnings.getDriverId())
                 .totalEarnings(earnings.getTotalEarnings())
-                .totalDeliveries(earnings.getTotalDeliveries())
-                .activeDeliveries(earnings.getActiveDeliveries())
+                .totalDeliveries(totalDeliveries)
+                .activeDeliveries(activeDeliveries)
                 .todaysEarnings(earnings.getTodaysEarnings())
                 .build();
     }
