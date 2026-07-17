@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
@@ -61,6 +62,9 @@ public class KafkaConsumerConfig {
         factory.setConsumerFactory(paymentEventConsumerFactory());
         // Manual acknowledgment to prevent message loss on connection failure
         factory.getContainerProperties().setAckMode(org.springframework.kafka.listener.ContainerProperties.AckMode.MANUAL);
+        // Disable auto-startup to prevent connection failures on app startup
+        // Listeners will connect lazily when messages need to be consumed
+        factory.setAutoStartup(false);
         return factory;
     }
 
@@ -99,6 +103,8 @@ public class KafkaConsumerConfig {
         factory.setConsumerFactory(deliveryAssignedConsumerFactory());
         // Manual acknowledgment to prevent message loss on connection failure
         factory.getContainerProperties().setAckMode(org.springframework.kafka.listener.ContainerProperties.AckMode.MANUAL);
+        // Disable auto-startup to prevent connection failures on app startup
+        factory.setAutoStartup(false);
         return factory;
     }
 
@@ -137,6 +143,8 @@ public class KafkaConsumerConfig {
         factory.setConsumerFactory(restaurantDecisionEventConsumerFactory());
         // Manual acknowledgment to prevent message loss on connection failure
         factory.getContainerProperties().setAckMode(org.springframework.kafka.listener.ContainerProperties.AckMode.MANUAL);
+        // Disable auto-startup to prevent connection failures on app startup
+        factory.setAutoStartup(false);
         return factory;
     }
 }
