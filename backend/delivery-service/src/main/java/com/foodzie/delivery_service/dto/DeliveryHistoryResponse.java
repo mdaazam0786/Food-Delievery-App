@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class DeliveryHistoryResponse {
-    private Long id;
+    private String id;
     private String orderId;
     private String restaurantName;
     private String pickupAddress;
@@ -23,4 +23,9 @@ public class DeliveryHistoryResponse {
     private Integer customerRating;
     private String customerFeedback;
     private LocalDateTime completedAt;
+
+    // Explicit setter to ensure type safety
+    public void setId(String id) {
+        this.id = id;
+    }
 }
