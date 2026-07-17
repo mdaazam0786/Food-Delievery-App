@@ -77,6 +77,8 @@ public class KafkaConfig {
         factory.setConsumerFactory(orderStatusConsumerFactory());
         // Manual acknowledgment to prevent message loss on connection failure
         factory.getContainerProperties().setAckMode(org.springframework.kafka.listener.ContainerProperties.AckMode.MANUAL);
+        // Disable auto-startup to prevent connection failures on app startup
+        factory.setAutoStartup(false);
         return factory;
     }
 
