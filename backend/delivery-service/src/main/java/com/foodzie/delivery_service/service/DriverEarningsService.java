@@ -80,14 +80,13 @@ public class DriverEarningsService {
     public void initializeEarningsForDriver(String driverId) {
         // Only create if doesn't exist
         if (earningsRepository.findByDriverId(driverId).isEmpty()) {
-            DriverEarnings earnings = DriverEarnings.builder()
-                    .driverId(driverId)
-                    .totalEarnings(java.math.BigDecimal.ZERO)
-                    .totalDeliveries(0L)
-                    .activeDeliveries(0L)
-                    .todaysEarnings(java.math.BigDecimal.ZERO)
-                    .lastEarningsDate(LocalDate.now())
-                    .build();
+            DriverEarnings earnings = new DriverEarnings();
+            earnings.setDriverId(driverId);
+            earnings.setTotalEarnings(java.math.BigDecimal.ZERO);
+            earnings.setTotalDeliveries(0L);
+            earnings.setActiveDeliveries(0L);
+            earnings.setTodaysEarnings(java.math.BigDecimal.ZERO);
+            earnings.setLastEarningsDate(LocalDate.now());
 
             earningsRepository.save(earnings);
             log.info("Earnings record initialized for driver: {}", driverId);
