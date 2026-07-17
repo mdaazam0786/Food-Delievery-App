@@ -16,4 +16,13 @@ public class DriverEarningsResponse {
     private Long totalDeliveries;
     private Long activeDeliveries;
     private BigDecimal todaysEarnings;
+
+    // Explicit setter to ensure type safety
+    public void setTotalDeliveries(Long totalDeliveries) {
+        this.totalDeliveries = totalDeliveries;
+    }
+
+    public void setActiveDeliveries(Long activeDeliveries) {
+        this.activeDeliveries = activeDeliveries;
+    }
 }
