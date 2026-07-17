@@ -44,6 +44,12 @@ public class KafkaConsumerConfig {
         props.put(JsonDeserializer.TRUSTED_PACKAGES,
                 "com.foodzie.auth_service.event,com.foodzie.restaurant_service.event");
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
+        // DNS resolution and connection retry for Railway internal network
+        props.put("client.dns.lookup", "use_all_dns_ips");
+        props.put("reconnect.backoff.ms", 50);
+        props.put("reconnect.backoff.max.ms", 1000);
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);
+        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 10000);
 
         return new DefaultKafkaConsumerFactory<>(props);
     }
@@ -54,6 +60,8 @@ public class KafkaConsumerConfig {
         ConcurrentKafkaListenerContainerFactory<String, UserRegisteredEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(userRegisteredConsumerFactory());
+        // Manual acknowledgment to prevent message loss on connection failure
+        factory.getContainerProperties().setAckMode(org.springframework.kafka.listener.ContainerProperties.AckMode.MANUAL);
         return factory;
     }
 }

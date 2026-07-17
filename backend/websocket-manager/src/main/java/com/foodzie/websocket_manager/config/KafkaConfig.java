@@ -40,6 +40,12 @@ public class KafkaConfig {
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);
         props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 1);
         props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 100);
+        // DNS resolution and connection retry for Railway internal network
+        props.put("client.dns.lookup", "use_all_dns_ips");
+        props.put("reconnect.backoff.ms", 50);
+        props.put("reconnect.backoff.max.ms", 1000);
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);
+        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 10000);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
@@ -68,6 +74,12 @@ public class KafkaConfig {
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, OrderStatusUpdatedEvent.class.getName());
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
+        // DNS resolution and connection retry for Railway internal network
+        props.put("client.dns.lookup", "use_all_dns_ips");
+        props.put("reconnect.backoff.ms", 50);
+        props.put("reconnect.backoff.max.ms", 1000);
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);
+        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 10000);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
@@ -77,6 +89,8 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, OrderStatusUpdatedEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(orderEventConsumerFactory());
+        // Manual acknowledgment to prevent message loss on connection failure
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;
     }
 

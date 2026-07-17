@@ -54,6 +54,12 @@ public class KafkaConfig {
         props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 65536);        // 64 KB
         props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, batchWindowMs);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        // DNS resolution and connection retry for Railway internal network
+        props.put("client.dns.lookup", "use_all_dns_ips");
+        props.put("reconnect.backoff.ms", 50);
+        props.put("reconnect.backoff.max.ms", 1000);
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);
+        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 10000);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 

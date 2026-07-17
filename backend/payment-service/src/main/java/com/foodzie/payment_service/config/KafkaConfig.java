@@ -59,10 +59,12 @@ public class KafkaConfig {
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, OrderCreatedEvent.class.getName());
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
-        // DNS lookup strategy for Railway internal network
+        // DNS lookup strategy and connection retry for Railway internal network
         props.put("client.dns.lookup", "use_all_dns_ips");
         props.put("reconnect.backoff.ms", 50);
         props.put("reconnect.backoff.max.ms", 1000);
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);
+        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 10000);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
@@ -73,8 +75,6 @@ public class KafkaConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(orderCreatedConsumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        // Disable auto-start at factory level to prevent connection on startup
-        factory.setAutoStartup(false);
         return factory;
     }
 
