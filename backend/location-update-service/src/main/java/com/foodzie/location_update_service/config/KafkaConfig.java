@@ -60,6 +60,8 @@ public class KafkaConfig {
         props.put("reconnect.backoff.max.ms", 1000);
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);
         props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 10000);
+        props.put(ConsumerConfig.CONNECTIONS_MAX_IDLE_MS_CONFIG, 540000);
+        props.put("socket.keepalive.enabled", true);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
