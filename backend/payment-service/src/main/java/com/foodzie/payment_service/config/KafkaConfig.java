@@ -21,7 +21,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
-    @Value("${spring.kafka.bootstrap-servers:cp-kafka.railway.internal:9092}")
+    @Value("${spring.kafka.bootstrap-servers:tokaido.proxy.rlwy.net:48268}")
     private String bootstrapServers;
 
     @Value("${spring.kafka.consumer.group-id:payment-service-group}")
