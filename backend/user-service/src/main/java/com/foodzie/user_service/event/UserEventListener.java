@@ -1,6 +1,5 @@
 package com.foodzie.user_service.event;
 
-import com.foodzie.auth_service.event.UserRegisteredEvent;
 import com.foodzie.user_service.data.UserProfile;
 import com.foodzie.user_service.data.UserProfileRepository;
 import lombok.RequiredArgsConstructor;

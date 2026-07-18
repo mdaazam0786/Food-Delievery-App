@@ -1,6 +1,6 @@
 package com.foodzie.user_service.config;
 
-import com.foodzie.auth_service.event.UserRegisteredEvent;
+import com.foodzie.user_service.event.UserRegisteredEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
