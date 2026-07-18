@@ -71,6 +71,12 @@
 			<version>1.39.0</version>
 		</dependency>
 
+		<!-- Kafka – consumes UserRegisteredEvent to create UserProfile -->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
+
 		<!-- Eureka Client -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
