@@ -31,13 +31,13 @@ public class ExcelParsingUtil {
                 restaurantData.put("rowNumber", String.valueOf(i + 1));
                 restaurantData.put("name", getCellValue(row, columnMap, "name"));
                 restaurantData.put("description", getCellValue(row, columnMap, "description"));
-                restaurantData.put("addressText", getCellValue(row, columnMap, "addressText"));
+                restaurantData.put("addressText", getCellValue(row, columnMap, "addresstext"));
                 restaurantData.put("latitude", getCellValue(row, columnMap, "latitude"));
                 restaurantData.put("longitude", getCellValue(row, columnMap, "longitude"));
-                restaurantData.put("gstNo", getCellValue(row, columnMap, "gstNo"));
-                restaurantData.put("fssaiNo", getCellValue(row, columnMap, "fssaiNo"));
+                restaurantData.put("gstNo", getCellValue(row, columnMap, "gstno"));
+                restaurantData.put("fssaiNo", getCellValue(row, columnMap, "fssaino"));
                 restaurantData.put("ownerEmail", getCellValue(row, columnMap, "owneremail"));
-                restaurantData.put("imageUrl", getCellValue(row, columnMap, "imageUrl"));
+                restaurantData.put("imageUrl", getCellValue(row, columnMap, "imageurl"));
                 
                 restaurants.add(restaurantData);
             }
@@ -71,7 +71,7 @@ public class ExcelParsingUtil {
                 itemData.put("description", getCellValue(row, columnMap, "description"));
                 itemData.put("price", getCellValue(row, columnMap, "price"));
                 itemData.put("category", getCellValue(row, columnMap, "category"));
-                itemData.put("isVeg", getCellValue(row, columnMap, "isVeg"));
+                itemData.put("isVeg", getCellValue(row, columnMap, "isveg"));
                 itemData.put("imageUrl", getCellValue(row, columnMap, "imageurl"));
                 
                 menuItems.add(itemData);
@@ -84,8 +84,13 @@ public class ExcelParsingUtil {
     private static Map<String, Integer> getColumnMap(Row headerRow) {
         Map<String, Integer> columnMap = new HashMap<>();
         for (int i = 0; i < headerRow.getLastCellNum(); i++) {
-            String header = headerRow.getCell(i).getStringCellValue().toLowerCase().trim();
-            columnMap.put(header, i);
+            Cell cell = headerRow.getCell(i);
+            if (cell != null) {
+                String header = cell.getStringCellValue().toLowerCase().trim();
+                // Also store without spaces for flexibility
+                header = header.replaceAll("\\s+", "");
+                columnMap.put(header, i);
+            }
         }
         return columnMap;
     }
