@@ -26,20 +26,26 @@ public class UserEventPublisher {
      */
     public void publishUserRegistered(UserRegisteredEvent event) {
         String key = String.valueOf(event.getUserId());
-        CompletableFuture<SendResult<String, UserRegisteredEvent>> future =
-                kafkaTemplate.send(userRegisteredTopic, key, event);
+        try {
+            CompletableFuture<SendResult<String, UserRegisteredEvent>> future =
+                    kafkaTemplate.send(userRegisteredTopic, key, event);
 
-        future.whenComplete((result, ex) -> {
-            if (ex != null) {
-                log.error("Failed to publish UserRegisteredEvent for userId={}: {}",
-                        event.getUserId(), ex.getMessage(), ex);
-            } else {
-                log.info("Published UserRegisteredEvent for userId={} to topic={} partition={} offset={}",
-                        event.getUserId(),
-                        result.getRecordMetadata().topic(),
-                        result.getRecordMetadata().partition(),
-                        result.getRecordMetadata().offset());
-            }
-        });
+            future.whenComplete((result, ex) -> {
+                if (ex != null) {
+                    log.error("Failed to publish UserRegisteredEvent for userId={}: {}",
+                            event.getUserId(), ex.getMessage(), ex);
+                } else {
+                    log.info("Published UserRegisteredEvent for userId={} to topic={} partition={} offset={}",
+                            event.getUserId(),
+                            result.getRecordMetadata().topic(),
+                            result.getRecordMetadata().partition(),
+                            result.getRecordMetadata().offset());
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Kafka is not available. UserRegisteredEvent for userId={} will not be published. " +
+                    "Error: {}", event.getUserId(), e.getMessage());
+            // Don't rethrow - allow registration to proceed even if Kafka is down
+        }
     }
 }
