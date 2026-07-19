@@ -83,6 +83,7 @@ export interface RestaurantResponse {
   discount?:   string;
   createdAt:   string;
   updatedAt:   string;
+  menuItems?:  MenuItemResponse[];
 }
 
 export interface UpdateRestaurantStatusPayload {
