@@ -185,7 +185,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         if (!restaurantRepository.existsById(restaurantId)) {
             throw new RestaurantNotFoundException("Restaurant not found: " + restaurantId);
         }
-        // Return all menu items (available filtering happens at query level for all items)
+        // Return all menu items for the restaurant
         return menuItemRepository.findAllByRestaurantId(restaurantId)
                 .stream()
                 .map(this::toMenuItemResponse)
