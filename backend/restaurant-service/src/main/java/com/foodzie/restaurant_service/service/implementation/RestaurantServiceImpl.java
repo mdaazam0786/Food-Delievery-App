@@ -3,6 +3,7 @@ package com.foodzie.restaurant_service.service.implementation;
 import com.foodzie.restaurant_service.data.MenuItem;
 import com.foodzie.restaurant_service.data.Restaurant;
 import com.foodzie.restaurant_service.data.RestaurantDocument;
+import com.foodzie.restaurant_service.data.RestaurantStatus;
 import com.foodzie.restaurant_service.dto.*;
 import com.foodzie.restaurant_service.exception.MenuItemNotFoundException;
 import com.foodzie.restaurant_service.exception.RestaurantNotFoundException;
