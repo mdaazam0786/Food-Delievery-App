@@ -236,7 +236,6 @@ public class RestaurantServiceImpl implements RestaurantService {
         try {
             List<RestaurantDocument.MenuItemIndexDoc> menuItemDocs = items != null
                     ? items.stream()
-                        .filter(MenuItem::isAvailable)
                         .map(item -> RestaurantDocument.MenuItemIndexDoc.builder()
                                 .id(item.getId())
                                 .name(item.getName())
