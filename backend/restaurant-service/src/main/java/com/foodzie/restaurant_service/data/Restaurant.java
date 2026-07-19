@@ -106,7 +106,7 @@ public class Restaurant {
      * Stored directly in the restaurant document.
      */
     @Builder.Default
-    @Field("menu_items")
+    @Field("menuItems")
     private List<RestaurantMenuItem> menuItems = new ArrayList<>();
 
     /**

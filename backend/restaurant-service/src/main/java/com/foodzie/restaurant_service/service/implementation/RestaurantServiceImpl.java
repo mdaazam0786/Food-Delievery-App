@@ -174,7 +174,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public RestaurantResponse getRestaurant(String restaurantId) {
-        return toResponse(restaurantRepository.findById(restaurantId)
+        return toResponseFromDocument(searchRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(
                         "Restaurant not found: " + restaurantId)));
     }
@@ -318,6 +318,40 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .discount(r.getDiscount())
                 .createdAt(r.getCreatedAt())
                 .updatedAt(r.getUpdatedAt())
+                .menuItems(menuItems)
+                .build();
+    }
+
+    private RestaurantResponse toResponseFromDocument(RestaurantDocument doc) {
+        List<MenuItemResponse> menuItems = doc.getMenuItems() == null
+                ? List.of()
+                : doc.getMenuItems().stream()
+                    .map(item -> MenuItemResponse.builder()
+                            .id(item.getId())
+                            .name(item.getName())
+                            .description(item.getDescription())
+                            .price(item.getPrice() != null ? new java.math.BigDecimal(item.getPrice()) : null)
+                            .category(item.getCategory())
+                            .isVeg(item.isVeg())
+                            .available(item.isAvailable())
+                            .rating(item.getRating())
+                            .totalRatings(item.getTotalRatings())
+                            .build())
+                    .collect(Collectors.toList());
+
+        return RestaurantResponse.builder()
+                .id(doc.getId())
+                .ownerEmail(doc.getOwnerEmail())
+                .name(doc.getName())
+                .description(doc.getDescription())
+                .addressText(doc.getAddressText())
+                .latitude(doc.getLatitude())
+                .longitude(doc.getLongitude())
+                .imageUrl(doc.getImageUrl())
+                .status(doc.getStatus() != null ? RestaurantStatus.valueOf(doc.getStatus()) : RestaurantStatus.CLOSED)
+                .rating(doc.getRating())
+                .totalRatings(doc.getTotalRatings())
+                .discount(doc.getDiscount())
                 .menuItems(menuItems)
                 .build();
     }
