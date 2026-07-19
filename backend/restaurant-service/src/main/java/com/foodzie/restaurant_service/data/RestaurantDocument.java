@@ -67,8 +67,6 @@ public class RestaurantDocument {
     @AllArgsConstructor
     @Builder
     public static class MenuItemIndexDoc {
-        private String id;
-
         private String name;
 
         private String description;
@@ -85,7 +83,7 @@ public class RestaurantDocument {
 
         private Integer totalRatings;
 
-        private String imageUrl;
+        private String imageURL;
 
         private String imagePublicId;
 

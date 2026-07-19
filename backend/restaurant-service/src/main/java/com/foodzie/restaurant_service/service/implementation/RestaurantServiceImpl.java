@@ -237,7 +237,6 @@ public class RestaurantServiceImpl implements RestaurantService {
             List<RestaurantDocument.MenuItemIndexDoc> menuItemDocs = items != null
                     ? items.stream()
                         .map(item -> RestaurantDocument.MenuItemIndexDoc.builder()
-                                .id(item.getId())
                                 .name(item.getName())
                                 .description(item.getDescription())
                                 .category(item.getCategory())
@@ -246,7 +245,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                                 .isVeg(item.isVeg())
                                 .rating(item.getRating())
                                 .totalRatings(item.getTotalRatings())
-                                .imageUrl(item.getImageUrl())
+                                .imageURL(item.getImageUrl())
                                 .imagePublicId(item.getImagePublicId())
                                 .updatedAt(item.getUpdatedAt())
                                 .build())
@@ -330,7 +329,6 @@ public class RestaurantServiceImpl implements RestaurantService {
                 ? List.of()
                 : doc.getMenuItems().stream()
                     .map(item -> MenuItemResponse.builder()
-                            .id(item.getId())
                             .name(item.getName())
                             .description(item.getDescription())
                             .price(item.getPrice() != null ? new java.math.BigDecimal(item.getPrice()) : null)
@@ -339,6 +337,9 @@ public class RestaurantServiceImpl implements RestaurantService {
                             .available(item.isAvailable())
                             .rating(item.getRating())
                             .totalRatings(item.getTotalRatings())
+                            .imageUrl(item.getImageURL())
+                            .imagePublicId(item.getImagePublicId())
+                            .updatedAt(item.getUpdatedAt())
                             .build())
                     .collect(Collectors.toList());
 
