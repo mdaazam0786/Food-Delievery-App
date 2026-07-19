@@ -6,17 +6,9 @@ import com.foodzie.search_service.dto.RestaurantSearchResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.geo.Distance;
-import org.springframework.data.geo.GeoResults;
-import org.springframework.data.geo.Point;
-import org.springframework.data.geo.Circle;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Service;
 
@@ -70,24 +62,31 @@ public class RestaurantSearchService {
     public PagedSearchResponse nearby(double lat, double lon, double radiusKm,
                                       int page, int size) {
         int resolvedSize = size > 0 ? size : defaultPageSize;
-        Pageable pageable = PageRequest.of(page, resolvedSize);
 
-        Point userLocation = new Point(lon, lat);
-        Circle circle = new Circle(userLocation, new Distance(radiusKm, org.springframework.data.geo.Metrics.KILOMETERS));
-
+        // Fetch all OPEN restaurants (no geo filter at query level)
         Query query = new Query()
-                .addCriteria(Criteria.where("status").is("OPEN"))
-                .addCriteria(Criteria.where("location").within(circle));
+                .addCriteria(Criteria.where("status").is("OPEN"));
 
-        query.with(pageable);
+        List<RestaurantDocument> allResults = mongoTemplate.find(query, RestaurantDocument.class, COLLECTION);
 
-        long total = mongoTemplate.count(query, RestaurantDocument.class, COLLECTION);
-        List<RestaurantDocument> results = mongoTemplate.find(query, RestaurantDocument.class, COLLECTION);
+        // Filter by distance and sort in-memory
+        List<RestaurantDocument> withinRadius = allResults.stream()
+                .filter(r -> haversineKm(lat, lon, r.getLatitude(), r.getLongitude()) <= radiusKm)
+                .sorted((r1, r2) -> Double.compare(
+                        haversineKm(lat, lon, r1.getLatitude(), r1.getLongitude()),
+                        haversineKm(lat, lon, r2.getLatitude(), r2.getLongitude())
+                ))
+                .collect(Collectors.toList());
+
+        // Manual pagination
+        int start = page * resolvedSize;
+        int end = Math.min(start + resolvedSize, withinRadius.size());
+        List<RestaurantDocument> paginatedResults = withinRadius.subList(start, end);
 
         log.debug("Nearby query lat={} lon={} radius={}km page={} size={} hits={}",
-                lat, lon, radiusKm, page, resolvedSize, total);
+                lat, lon, radiusKm, page, resolvedSize, withinRadius.size());
 
-        return toPagedResponse(results, page, resolvedSize, total, lat, lon);
+        return toPagedResponse(paginatedResults, page, resolvedSize, withinRadius.size(), lat, lon);
     }
 
     // ── Query 2: Universal Search with Geo-Decay ──────────────────────────────
@@ -95,7 +94,6 @@ public class RestaurantSearchService {
     public PagedSearchResponse search(String query, double lat, double lon,
                                       double radiusKm, int page, int size) {
         int resolvedSize = size > 0 ? size : defaultPageSize;
-        Pageable pageable = PageRequest.of(page, resolvedSize);
 
         // Text search criteria
         Criteria textCriteria = new Criteria().orOperator(
@@ -104,24 +102,31 @@ public class RestaurantSearchService {
                 Criteria.where("menuItems.description").regex(query, "i")
         );
 
-        // Radius filter
-        Point userLocation = new Point(lon, lat);
-        Circle circle = new Circle(userLocation, new Distance(radiusKm, org.springframework.data.geo.Metrics.KILOMETERS));
-
+        // Status filter + text search (no geo at query level)
         Query mongoQuery = new Query()
                 .addCriteria(Criteria.where("status").is("OPEN"))
-                .addCriteria(textCriteria)
-                .addCriteria(Criteria.where("location").within(circle));
+                .addCriteria(textCriteria);
 
-        mongoQuery.with(pageable);
+        List<RestaurantDocument> allResults = mongoTemplate.find(mongoQuery, RestaurantDocument.class, COLLECTION);
 
-        long total = mongoTemplate.count(mongoQuery, RestaurantDocument.class, COLLECTION);
-        List<RestaurantDocument> results = mongoTemplate.find(mongoQuery, RestaurantDocument.class, COLLECTION);
+        // Filter by distance and sort in-memory
+        List<RestaurantDocument> withinRadius = allResults.stream()
+                .filter(r -> haversineKm(lat, lon, r.getLatitude(), r.getLongitude()) <= radiusKm)
+                .sorted((r1, r2) -> Double.compare(
+                        haversineKm(lat, lon, r1.getLatitude(), r1.getLongitude()),
+                        haversineKm(lat, lon, r2.getLatitude(), r2.getLongitude())
+                ))
+                .collect(Collectors.toList());
+
+        // Manual pagination
+        int start = page * resolvedSize;
+        int end = Math.min(start + resolvedSize, withinRadius.size());
+        List<RestaurantDocument> paginatedResults = withinRadius.subList(start, end);
 
         log.debug("Search query='{}' lat={} lon={} radius={}km page={} size={} hits={}",
-                query, lat, lon, radiusKm, page, resolvedSize, total);
+                query, lat, lon, radiusKm, page, resolvedSize, withinRadius.size());
 
-        return toPagedResponse(results, page, resolvedSize, total, lat, lon);
+        return toPagedResponse(paginatedResults, page, resolvedSize, withinRadius.size(), lat, lon);
     }
 
     // ── Mapping helpers ───────────────────────────────────────────────────────
