@@ -247,6 +247,9 @@ public class RestaurantServiceImpl implements RestaurantService {
                                 .isVeg(item.isVeg())
                                 .rating(item.getRating())
                                 .totalRatings(item.getTotalRatings())
+                                .imageUrl(item.getImageUrl())
+                                .imagePublicId(item.getImagePublicId())
+                                .updatedAt(item.getUpdatedAt())
                                 .build())
                         .collect(Collectors.toList())
                     : new java.util.ArrayList<>();

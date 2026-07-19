@@ -84,5 +84,11 @@ public class RestaurantDocument {
         private Double rating;
 
         private Integer totalRatings;
+
+        private String imageUrl;
+
+        private String imagePublicId;
+
+        private java.time.LocalDateTime updatedAt;
     }
 }
