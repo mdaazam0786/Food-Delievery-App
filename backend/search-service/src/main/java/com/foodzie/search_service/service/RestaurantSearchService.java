@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResults;
 import org.springframework.data.geo.Point;
+import org.springframework.data.geo.Circle;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -72,11 +73,11 @@ public class RestaurantSearchService {
         Pageable pageable = PageRequest.of(page, resolvedSize);
 
         Point userLocation = new Point(lon, lat);
-        Distance distance = new Distance(radiusKm, org.springframework.data.geo.Metrics.KILOMETERS);
+        Circle circle = new Circle(userLocation, new Distance(radiusKm, org.springframework.data.geo.Metrics.KILOMETERS));
 
         Query query = new Query()
                 .addCriteria(Criteria.where("status").is("OPEN"))
-                .addCriteria(Criteria.where("location").within(userLocation, distance));
+                .addCriteria(Criteria.where("location").within(circle));
 
         query.with(pageable);
 
@@ -105,12 +106,12 @@ public class RestaurantSearchService {
 
         // Radius filter
         Point userLocation = new Point(lon, lat);
-        Distance distance = new Distance(radiusKm, org.springframework.data.geo.Metrics.KILOMETERS);
+        Circle circle = new Circle(userLocation, new Distance(radiusKm, org.springframework.data.geo.Metrics.KILOMETERS));
 
         Query mongoQuery = new Query()
                 .addCriteria(Criteria.where("status").is("OPEN"))
                 .addCriteria(textCriteria)
-                .addCriteria(Criteria.where("location").within(userLocation, distance));
+                .addCriteria(Criteria.where("location").within(circle));
 
         mongoQuery.with(pageable);
 
