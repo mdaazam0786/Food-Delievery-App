@@ -290,7 +290,14 @@ public class RestaurantServiceImpl implements RestaurantService {
         List<MenuItemResponse> menuItems = r.getMenuItems() == null
                 ? List.of()
                 : r.getMenuItems().stream()
-                    .map(this::toMenuItemResponse)
+                    .map(item -> MenuItemResponse.builder()
+                            .name(item.getName())
+                            .description(item.getDescription())
+                            .price(item.getPrice() != null ? new java.math.BigDecimal(item.getPrice()) : null)
+                            .category(item.getCategory())
+                            .imageUrl(item.getImageUrl())
+                            .isVeg(item.getIsVeg() != null ? item.getIsVeg() : false)
+                            .build())
                     .collect(Collectors.toList());
 
         return RestaurantResponse.builder()

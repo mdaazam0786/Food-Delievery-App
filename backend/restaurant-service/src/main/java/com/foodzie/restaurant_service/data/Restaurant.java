@@ -107,5 +107,21 @@ public class Restaurant {
      */
     @Builder.Default
     @Field("menu_items")
-    private List<MenuItem> menuItems = new ArrayList<>();
+    private List<RestaurantMenuItem> menuItems = new ArrayList<>();
+
+    /**
+     * Nested menu item embedded in restaurant document.
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class RestaurantMenuItem {
+        private String name;
+        private String description;
+        private Double price;
+        private Boolean isVeg;
+        private String category;
+        private String imageUrl;
+    }
 }
