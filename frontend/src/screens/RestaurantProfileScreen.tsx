@@ -121,7 +121,7 @@ const RestaurantProfileScreen: React.FC = () => {
     new Set(menuItems.map((item) => item.category).filter(Boolean))
   );
 
-  // Fetch restaurant and menu data
+  // Fetch restaurant details (which includes menuItems)
   useEffect(() => {
     if (!id) {
       setError('Restaurant ID not found.');
@@ -133,13 +133,11 @@ const RestaurantProfileScreen: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const [resData, menuData] = await Promise.all([
-          getRestaurantDetails(id),
-          getMenuItems(id),
-        ]);
+        const resData = await getRestaurantDetails(id);
         setRestaurant(resData);
-        setMenuItems(menuData);
-        console.log('Menu items loaded:', menuData.map(item => ({ name: item.name, isVeg: item.isVeg })));
+        // Menu items are now included in the restaurant response
+        setMenuItems(resData.menuItems || []);
+        console.log('Menu items loaded:', (resData.menuItems || []).map(item => ({ name: item.name, isVeg: item.isVeg })));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load restaurant');
       } finally {

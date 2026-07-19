@@ -287,6 +287,12 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     private RestaurantResponse toResponse(Restaurant r) {
+        List<MenuItemResponse> menuItems = r.getMenuItems() == null
+                ? List.of()
+                : r.getMenuItems().stream()
+                    .map(this::toMenuItemResponse)
+                    .collect(Collectors.toList());
+
         return RestaurantResponse.builder()
                 .id(r.getId())
                 .ownerEmail(r.getOwnerEmail())
@@ -305,6 +311,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .discount(r.getDiscount())
                 .createdAt(r.getCreatedAt())
                 .updatedAt(r.getUpdatedAt())
+                .menuItems(menuItems)
                 .build();
     }
 

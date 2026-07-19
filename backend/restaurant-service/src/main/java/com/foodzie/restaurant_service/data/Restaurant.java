@@ -100,4 +100,12 @@ public class Restaurant {
     @LastModifiedDate
     @Field("updated_at")
     private LocalDateTime updatedAt;
+
+    /**
+     * Embedded list of menu items for this restaurant.
+     * Stored directly in the restaurant document.
+     */
+    @Builder.Default
+    @Field("menu_items")
+    private List<MenuItem> menuItems = new ArrayList<>();
 }

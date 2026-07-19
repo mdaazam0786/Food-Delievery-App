@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -26,4 +27,5 @@ public class RestaurantResponse {
     private String discount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<MenuItemResponse> menuItems;
 }
