@@ -1,24 +1,30 @@
 # Vercel-compatible Dockerfile for Restaurant Service
 # Uses lightweight alpine base with minimal layers for fast deployments
-# Note: Requires full monorepo context for building (common-exceptions dependency)
 
 FROM eclipse-temurin:21-jdk-alpine as builder
 
 WORKDIR /build
 
-# Install Maven
-RUN apk add --no-cache maven
+# Install Maven and Git
+RUN apk add --no-cache maven git
 
-# Copy the entire backend directory structure to ensure common-exceptions is available
-# This assumes the build context is set from the repository root
-COPY backend ./
+# Copy pom.xml first
+COPY pom.xml .
 
-# Install common-exceptions module first
-WORKDIR /build/common-exceptions
-RUN mvn clean install -q
+# Clone or fetch common-exceptions from the repository
+# This ensures we have the dependency available during build
+RUN git clone --depth 1 https://github.com/mdaazam0786/Food-Delievery-App.git /tmp/foodzie-repo && \
+    cd /tmp/foodzie-repo/backend/common-exceptions && \
+    mvn clean install -q -DskipTests && \
+    cd /build
 
-# Build restaurant-service
-WORKDIR /build/restaurant-service
+# Download dependencies (cache layer)
+RUN mvn dependency:go-offline -B
+
+# Copy source code
+COPY src ./src
+
+# Build application
 RUN mvn clean package -DskipTests -q
 
 # Runtime stage - Alpine Linux for minimal size
@@ -27,7 +33,7 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Copy JAR from builder
-COPY --from=builder /build/restaurant-service/target/*.jar app.jar
+COPY --from=builder /build/target/*.jar app.jar
 
 # Health check (default port 8087, override with PORT env var)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
