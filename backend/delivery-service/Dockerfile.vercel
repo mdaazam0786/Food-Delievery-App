@@ -1,0 +1,38 @@
+# Vercel-compatible Dockerfile for Delivery Service
+# Uses lightweight alpine base with minimal layers for fast deployments
+
+FROM eclipse-temurin:21-jdk-alpine as builder
+
+WORKDIR /build
+
+# Copy pom.xml
+COPY pom.xml .
+
+# Download dependencies (cache layer)
+RUN apk add --no-cache maven && \
+    mvn dependency:go-offline -B
+
+# Copy source code
+COPY src ./src
+
+# Build application
+RUN mvn clean package -DskipTests -q
+
+# Runtime stage - Alpine Linux for minimal size
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+# Copy JAR from builder
+COPY --from=builder /build/target/*.jar app.jar
+
+# Health check (default port 8090, override with PORT env var)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD wget -q -O - http://localhost:${PORT:-8090}/actuator/health | grep -q UP || exit 1
+
+# Expose default port (can be overridden by PORT environment variable at runtime)
+EXPOSE 8090
+
+# Run application with dynamic PORT environment variable
+# The PORT env var is read from Vercel at runtime
+CMD ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8090}"]
