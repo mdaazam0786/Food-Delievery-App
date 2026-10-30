@@ -3,6 +3,9 @@ package com.foodzie.auth_service.controller;
 import com.foodzie.auth_service.dto.*;
 import com.foodzie.auth_service.service.AuthService;
 import com.foodzie.auth_service.util.ExcelParsingUtil;
+import com.foodzie.common.dto.ApiResponse;
+import com.foodzie.common.exceptions.BadRequestException;
+import com.foodzie.common.exceptions.InternalServerException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -70,19 +73,39 @@ public class BulkUserController {
             @RequestParam("file") MultipartFile file) {
         
         try {
+            log.info("Received bulk user import request");
+            
+            // Validate file
+            if (file == null) {
+                log.warn("File upload validation failed: file is null");
+                throw new BadRequestException("File is required");
+            }
+            
             if (file.isEmpty()) {
-                throw new IllegalArgumentException("File is empty");
+                log.warn("File upload validation failed: file is empty");
+                throw new BadRequestException("File is empty");
             }
             
             String filename = file.getOriginalFilename();
+            if (filename == null || filename.isBlank()) {
+                log.warn("File upload validation failed: filename is invalid");
+                throw new BadRequestException("Invalid filename");
+            }
+            
             if (!filename.endsWith(".xlsx") && !filename.endsWith(".xls")) {
-                throw new IllegalArgumentException("Only .xlsx and .xls files are supported");
+                log.warn("File upload validation failed: unsupported file type - {}", filename);
+                throw BadRequestException.of("file", "Only .xlsx and .xls files are supported");
             }
             
             log.info("Processing bulk user import from Excel file: {}", filename);
             
             // Parse Excel file
             List<Map<String, String>> userDataList = ExcelParsingUtil.parseUserExcel(file);
+            
+            if (userDataList == null || userDataList.isEmpty()) {
+                log.warn("Excel file parsing resulted in empty user list");
+                throw new BadRequestException("No users found in Excel file");
+            }
             
             // Convert to BulkUserImportRequest
             List<BulkUserImportRequest.UserImportData> users = new ArrayList<>();
@@ -100,8 +123,13 @@ public class BulkUserController {
                     .users(users)
                     .build();
             
+            log.debug("Processing {} users from Excel file", users.size());
+            
             // Process bulk registration
             BulkUserImportResponse response = authService.bulkRegister(request);
+            
+            log.info("Bulk user import completed - Success: {}, Failure: {}", 
+                    response.getSuccessCount(), response.getFailureCount());
             
             return ResponseEntity.ok(ApiResponse.ok(
                     String.format("Users imported - Success: %d, Failure: %d", 
@@ -109,20 +137,15 @@ public class BulkUserController {
                     response
             ));
             
+        } catch (BadRequestException e) {
+            log.warn("Bad request during bulk user import: {}", e.getMessage());
+            throw e;
         } catch (IOException e) {
-            log.error("Error reading Excel file: ", e);
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.<BulkUserImportResponse>builder()
-                            .success(false)
-                            .message("Error reading Excel file: " + e.getMessage())
-                            .build());
+            log.error("IO error reading Excel file: ", e);
+            throw new BadRequestException("Error reading Excel file: " + e.getMessage());
         } catch (Exception e) {
-            log.error("Error processing bulk user import: ", e);
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.<BulkUserImportResponse>builder()
-                            .success(false)
-                            .message("Error processing bulk user import: " + e.getMessage())
-                            .build());
+            log.error("Unexpected error during bulk user import", e);
+            throw new InternalServerException("Bulk user import failed", e);
         }
     }
 }

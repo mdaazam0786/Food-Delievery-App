@@ -1,5 +1,7 @@
 package com.foodzie.restaurant_service.controller;
 
+import com.foodzie.common.dto.ApiResponse;
+import com.foodzie.common.exceptions.*;
 import com.foodzie.restaurant_service.data.MenuItem;
 import com.foodzie.restaurant_service.data.Restaurant;
 import com.foodzie.restaurant_service.dto.*;
@@ -46,9 +48,21 @@ public class RestaurantAdminController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_RESTAURANT')")
     public ResponseEntity<ApiResponse<RestaurantResponse>> getMyRestaurant(
             @AuthenticationPrincipal Jwt jwt) {
-        String ownerEmail = jwt.getSubject();
-        return ResponseEntity.ok(ApiResponse.ok(
-                restaurantService.getMyRestaurant(ownerEmail)));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            String ownerEmail = jwt.getSubject();
+            log.debug("Fetching restaurant for owner: {}", ownerEmail);
+            return ResponseEntity.ok(ApiResponse.ok(
+                    restaurantService.getMyRestaurant(ownerEmail)));
+        } catch (UnauthorizedException ex) {
+            log.warn("Unauthorized access: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error fetching restaurant for authenticated user: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -61,11 +75,28 @@ public class RestaurantAdminController {
     public ResponseEntity<ApiResponse<RestaurantResponse>> createRestaurant(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateRestaurantRequest request) {
-        System.out.println("ENTERED CONTROLLER");
-        String ownerEmail = jwt.getSubject();
-        RestaurantResponse response = restaurantService.createRestaurant(ownerEmail, request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Restaurant onboarded successfully", response));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            if (request == null) {
+                throw new BadRequestException("Request body cannot be empty");
+            }
+            String ownerEmail = jwt.getSubject();
+            log.info("Creating restaurant for owner: {}", ownerEmail);
+            RestaurantResponse response = restaurantService.createRestaurant(ownerEmail, request);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponse.ok("Restaurant onboarded successfully", response));
+        } catch (BadRequestException | UnauthorizedException ex) {
+            log.warn("Invalid request: {}", ex.getMessage());
+            throw ex;
+        } catch (ConflictException ex) {
+            log.warn("Conflict creating restaurant: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error creating restaurant: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -78,9 +109,27 @@ public class RestaurantAdminController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable String restaurantId,
             @Valid @RequestBody UpdateRestaurantStatusRequest request) {
-        String ownerEmail = jwt.getSubject();
-        return ResponseEntity.ok(ApiResponse.ok("Status updated",
-                restaurantService.updateStatus(restaurantId, ownerEmail, request)));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            if (restaurantId == null || restaurantId.isBlank()) {
+                throw new BadRequestException("Restaurant ID cannot be empty");
+            }
+            if (request == null) {
+                throw new BadRequestException("Request body cannot be empty");
+            }
+            String ownerEmail = jwt.getSubject();
+            log.info("Updating status for restaurant: {} by user: {}", restaurantId, ownerEmail);
+            return ResponseEntity.ok(ApiResponse.ok("Status updated",
+                    restaurantService.updateStatus(restaurantId, ownerEmail, request)));
+        } catch (BadRequestException | UnauthorizedException ex) {
+            log.warn("Invalid request: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error updating restaurant status: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -96,9 +145,25 @@ public class RestaurantAdminController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable String restaurantId,
             org.springframework.data.domain.Pageable pageable) {
-        String ownerEmail = jwt.getSubject();
-        org.springframework.data.domain.Page<MenuItemResponse> response = restaurantService.getMenuItemsByOwner(restaurantId, ownerEmail, pageable);
-        return ResponseEntity.ok(ApiResponse.ok(response));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            if (restaurantId == null || restaurantId.isBlank()) {
+                throw new BadRequestException("Restaurant ID cannot be empty");
+            }
+            String ownerEmail = jwt.getSubject();
+            log.debug("Fetching menu items for restaurant: {} by owner: {}", restaurantId, ownerEmail);
+            org.springframework.data.domain.Page<MenuItemResponse> response = 
+                    restaurantService.getMenuItemsByOwner(restaurantId, ownerEmail, pageable);
+            return ResponseEntity.ok(ApiResponse.ok(response));
+        } catch (BadRequestException | UnauthorizedException ex) {
+            log.warn("Invalid request: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error fetching menu items for restaurant {}: {}", restaurantId, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -111,10 +176,28 @@ public class RestaurantAdminController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable String restaurantId,
             @Valid @RequestBody AddMenuItemRequest request) {
-        String ownerEmail = jwt.getSubject();
-        MenuItemResponse response = restaurantService.addMenuItem(restaurantId, ownerEmail, request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Menu item added", response));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            if (restaurantId == null || restaurantId.isBlank()) {
+                throw new BadRequestException("Restaurant ID cannot be empty");
+            }
+            if (request == null) {
+                throw new BadRequestException("Request body cannot be empty");
+            }
+            String ownerEmail = jwt.getSubject();
+            log.info("Adding menu item to restaurant: {} by owner: {}", restaurantId, ownerEmail);
+            MenuItemResponse response = restaurantService.addMenuItem(restaurantId, ownerEmail, request);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponse.ok("Menu item added", response));
+        } catch (BadRequestException | UnauthorizedException ex) {
+            log.warn("Invalid request: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error adding menu item to restaurant {}: {}", restaurantId, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -129,9 +212,30 @@ public class RestaurantAdminController {
             @PathVariable String restaurantId,
             @PathVariable String itemId,
             @Valid @RequestBody UpdateMenuItemRequest request) {
-        String ownerEmail = jwt.getSubject();
-        return ResponseEntity.ok(ApiResponse.ok("Menu item updated",
-                restaurantService.updateMenuItem(restaurantId, itemId, ownerEmail, request)));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            if (restaurantId == null || restaurantId.isBlank()) {
+                throw new BadRequestException("Restaurant ID cannot be empty");
+            }
+            if (itemId == null || itemId.isBlank()) {
+                throw new BadRequestException("Item ID cannot be empty");
+            }
+            if (request == null) {
+                throw new BadRequestException("Request body cannot be empty");
+            }
+            String ownerEmail = jwt.getSubject();
+            log.info("Updating menu item: {} for restaurant: {} by owner: {}", itemId, restaurantId, ownerEmail);
+            return ResponseEntity.ok(ApiResponse.ok("Menu item updated",
+                    restaurantService.updateMenuItem(restaurantId, itemId, ownerEmail, request)));
+        } catch (BadRequestException | UnauthorizedException ex) {
+            log.warn("Invalid request: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error updating menu item {}: {}", itemId, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -151,34 +255,32 @@ public class RestaurantAdminController {
     @PostMapping("/upload-image")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_RESTAURANT')")
     public ResponseEntity<Map<String, String>> uploadImageProvisioning(
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @RequestParam("file") MultipartFile file) {
         try {
             if (file == null || file.isEmpty()) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "No file provided");
-                return ResponseEntity.badRequest().body(errorResponse);
+                log.warn("No file provided for restaurant image upload");
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "No file provided"));
             }
 
+            log.info("Uploading restaurant image, size: {} bytes", file.getSize());
             MediaUploadResult result = cloudinaryService.upload(file, "foodzie/restaurants");
             Map<String, String> response = new HashMap<>();
             response.put("imageUrl", result.getSecureUrl());
-            log.info("Restaurant image uploaded during provisioning: {}", result.getSecureUrl());
+            log.info("Restaurant image uploaded successfully: {}", result.getSecureUrl());
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             log.warn("Invalid image file: {}", e.getMessage());
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        } catch (ClassCastException e) {
-            log.error("Deserialization error during image upload (Elasticsearch type mismatch): {}", e.getMessage());
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Internal error during upload. Please try again.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        } catch (IOException e) {
+            log.error("IO error during restaurant image upload: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to process image file"));
         } catch (Exception e) {
-            log.error("Image upload failed", e);
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Image upload failed: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            log.error("Image upload failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Image upload failed: " + e.getMessage()));
         }
     }
 
@@ -191,30 +293,46 @@ public class RestaurantAdminController {
     public ResponseEntity<Map<String, String>> uploadMenuItemImage(
             @PathVariable String itemId,
             @AuthenticationPrincipal Jwt jwt,
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @RequestParam("file") MultipartFile file) {
         try {
+            if (jwt == null || jwt.getSubject() == null) {
+                log.warn("Unauthorized access to upload menu item image");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Unauthorized"));
+            }
+            if (itemId == null || itemId.isBlank()) {
+                log.warn("Item ID is empty for menu item image upload");
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Item ID cannot be empty"));
+            }
+            if (file == null || file.isEmpty()) {
+                log.warn("No file provided for menu item image upload");
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "No file provided"));
+            }
+
             String ownerEmail = jwt.getSubject();
+            log.info("Uploading menu item image for item: {} by user: {}", itemId, ownerEmail);
             
-            // Upload file to Cloudinary
             MediaUploadResult result = cloudinaryService.upload(file, "foodzie/menu-items");
-            
-            // Update menu item in service layer
             restaurantService.uploadMenuItemImage(itemId, ownerEmail, result.getSecureUrl(), result.getPublicId());
             
             Map<String, String> response = new HashMap<>();
             response.put("imageUrl", result.getSecureUrl());
-            log.info("Menu item image uploaded: {}", result.getSecureUrl());
+            log.info("Menu item image uploaded successfully: {}", result.getSecureUrl());
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             log.warn("Invalid image file: {}", e.getMessage());
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        } catch (IOException e) {
+            log.error("IO error during menu item image upload: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to process image file"));
         } catch (Exception e) {
-            log.error("Image upload failed", e);
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Image upload failed: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            log.error("Menu item image upload failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Image upload failed: " + e.getMessage()));
         }
     }
 
@@ -228,8 +346,26 @@ public class RestaurantAdminController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable String restaurantId,
             @Valid @RequestBody UpdateRestaurantRatingRequest request) {
-        String ownerEmail = jwt.getSubject();
-        return ResponseEntity.ok(ApiResponse.ok("Rating updated",
-                restaurantService.updateRating(restaurantId, ownerEmail, request)));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            if (restaurantId == null || restaurantId.isBlank()) {
+                throw new BadRequestException("Restaurant ID cannot be empty");
+            }
+            if (request == null) {
+                throw new BadRequestException("Request body cannot be empty");
+            }
+            String ownerEmail = jwt.getSubject();
+            log.info("Updating rating for restaurant: {} by owner: {}", restaurantId, ownerEmail);
+            return ResponseEntity.ok(ApiResponse.ok("Rating updated",
+                    restaurantService.updateRating(restaurantId, ownerEmail, request)));
+        } catch (BadRequestException | UnauthorizedException ex) {
+            log.warn("Invalid request: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error updating restaurant rating: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 }

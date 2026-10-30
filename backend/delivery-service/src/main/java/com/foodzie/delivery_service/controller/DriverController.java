@@ -1,5 +1,7 @@
 package com.foodzie.delivery_service.controller;
 
+import com.foodzie.common.dto.ApiResponse;
+import com.foodzie.common.exceptions.*;
 import com.foodzie.delivery_service.dto.*;
 import com.foodzie.delivery_service.model.DriverLocation;
 import com.foodzie.delivery_service.service.DriverEarningsService;
@@ -56,9 +58,24 @@ public class DriverController {
     @PreAuthorize("hasAnyRole('ROLE_DRIVER')")
     public ResponseEntity<ApiResponse<DriverResponse>> registerDriver(
             @Valid @RequestBody RegisterDriverRequest request) {
-        DriverResponse response = managementService.registerDriver(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Driver registered", response));
+        try {
+            if (request == null) {
+                throw new BadRequestException("Request body cannot be empty");
+            }
+            log.info("Registering new driver");
+            DriverResponse response = managementService.registerDriver(request);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponse.ok("Driver registered", response));
+        } catch (BadRequestException ex) {
+            log.warn("Invalid driver registration request: {}", ex.getMessage());
+            throw ex;
+        } catch (ConflictException ex) {
+            log.warn("Conflict during driver registration: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error registering driver: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -69,8 +86,20 @@ public class DriverController {
     @PreAuthorize("hasAnyRole('ROLE_DRIVER')")
     public ResponseEntity<ApiResponse<DriverResponse>> getDriver(
             @PathVariable String driverId) {
-        return ResponseEntity.ok(ApiResponse.ok("Driver profile",
-                managementService.getDriver(driverId)));
+        try {
+            if (driverId == null || driverId.isBlank()) {
+                throw new BadRequestException("Driver ID cannot be empty");
+            }
+            log.debug("Fetching driver profile: {}", driverId);
+            return ResponseEntity.ok(ApiResponse.ok("Driver profile",
+                    managementService.getDriver(driverId)));
+        } catch (BadRequestException ex) {
+            log.warn("Invalid driver ID: {}", driverId);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error fetching driver {}: {}", driverId, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -83,15 +112,20 @@ public class DriverController {
     @PreAuthorize("hasAnyRole('ROLE_DRIVER')")
     public ResponseEntity<ApiResponse<DriverResponse>> getProfileByEmail(
             @RequestHeader(value = "X-User-Email", required = false) String email) {
-        if (email == null || email.isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.<DriverResponse>builder()
-                            .success(false)
-                            .message("X-User-Email header is required")
-                            .build());
+        try {
+            if (email == null || email.isBlank()) {
+                throw new BadRequestException("X-User-Email header is required");
+            }
+            log.debug("Fetching driver profile by email");
+            return ResponseEntity.ok(ApiResponse.ok("Driver profile",
+                    managementService.getDriverByEmail(email)));
+        } catch (BadRequestException ex) {
+            log.warn("Invalid email header: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error fetching driver by email: {}", ex.getMessage(), ex);
+            throw ex;
         }
-        return ResponseEntity.ok(ApiResponse.ok("Driver profile",
-                managementService.getDriverByEmail(email)));
     }
 
     /**
@@ -104,8 +138,26 @@ public class DriverController {
     public ResponseEntity<ApiResponse<DriverResponse>> updateStatus(
             @PathVariable String driverId,
             @Valid @RequestBody UpdateDriverStatusRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Status updated",
-                managementService.updateStatus(driverId, request)));
+        try {
+            if (driverId == null || driverId.isBlank()) {
+                throw new BadRequestException("Driver ID cannot be empty");
+            }
+            if (request == null) {
+                throw new BadRequestException("Request body cannot be empty");
+            }
+            log.info("Updating driver status: {}", driverId);
+            return ResponseEntity.ok(ApiResponse.ok("Status updated",
+                    managementService.updateStatus(driverId, request)));
+        } catch (BadRequestException ex) {
+            log.warn("Invalid status update request: {}", ex.getMessage());
+            throw ex;
+        } catch (InvalidStateTransitionException ex) {
+            log.warn("Invalid state transition for driver {}: {}", driverId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error updating driver status {}: {}", driverId, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -117,8 +169,20 @@ public class DriverController {
     @PreAuthorize("hasAnyRole('ROLE_DRIVER')")
     public ResponseEntity<ApiResponse<DriverEarningsResponse>> getEarningsSummary(
             @PathVariable String driverId) {
-        return ResponseEntity.ok(ApiResponse.ok("Earnings summary",
-                earningsService.getEarningsSummary(driverId)));
+        try {
+            if (driverId == null || driverId.isBlank()) {
+                throw new BadRequestException("Driver ID cannot be empty");
+            }
+            log.debug("Fetching earnings summary for driver: {}", driverId);
+            return ResponseEntity.ok(ApiResponse.ok("Earnings summary",
+                    earningsService.getEarningsSummary(driverId)));
+        } catch (BadRequestException ex) {
+            log.warn("Invalid driver ID: {}", driverId);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error fetching earnings summary for driver {}: {}", driverId, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -132,9 +196,27 @@ public class DriverController {
             @PathVariable String driverId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(ApiResponse.ok("Delivery history",
-                earningsService.getDeliveryHistory(driverId, pageable)));
+        try {
+            if (driverId == null || driverId.isBlank()) {
+                throw new BadRequestException("Driver ID cannot be empty");
+            }
+            if (page < 0) {
+                throw new BadRequestException("Page number cannot be negative");
+            }
+            if (size < 1 || size > 100) {
+                throw new BadRequestException("Page size must be between 1 and 100");
+            }
+            log.debug("Fetching delivery history for driver: {} page={} size={}", driverId, page, size);
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(ApiResponse.ok("Delivery history",
+                    earningsService.getDeliveryHistory(driverId, pageable)));
+        } catch (BadRequestException ex) {
+            log.warn("Invalid request for delivery history: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error fetching delivery history for driver {}: {}", driverId, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -148,9 +230,27 @@ public class DriverController {
             @PathVariable String driverId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(ApiResponse.ok("Earnings history",
-                earningsService.getEarningsHistory(driverId, pageable)));
+        try {
+            if (driverId == null || driverId.isBlank()) {
+                throw new BadRequestException("Driver ID cannot be empty");
+            }
+            if (page < 0) {
+                throw new BadRequestException("Page number cannot be negative");
+            }
+            if (size < 1 || size > 100) {
+                throw new BadRequestException("Page size must be between 1 and 100");
+            }
+            log.debug("Fetching earnings history for driver: {} page={} size={}", driverId, page, size);
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(ApiResponse.ok("Earnings history",
+                    earningsService.getEarningsHistory(driverId, pageable)));
+        } catch (BadRequestException ex) {
+            log.warn("Invalid request for earnings history: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error fetching earnings history for driver {}: {}", driverId, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     // ── Driver app ────────────────────────────────────────────────────────────
@@ -165,13 +265,28 @@ public class DriverController {
     @PreAuthorize("hasAnyRole('ROLE_DRIVER')")
     public ResponseEntity<ApiResponse<Void>> locationPing(
             @Valid @RequestBody LocationPingRequest request) {
-        locationService.updateLocation(
-                request.getDriverId(),
-                request.getLatitude(),
-                request.getLongitude(),
-                request.getCityZone()
-        );
-        return ResponseEntity.ok(ApiResponse.ok("Location updated"));
+        try {
+            if (request == null) {
+                throw new BadRequestException("Request body cannot be empty");
+            }
+            if (request.getDriverId() == null || request.getDriverId().isBlank()) {
+                throw new BadRequestException("Driver ID cannot be empty");
+            }
+            log.debug("Updating location for driver: {}", request.getDriverId());
+            locationService.updateLocation(
+                    request.getDriverId(),
+                    request.getLatitude(),
+                    request.getLongitude(),
+                    request.getCityZone()
+            );
+            return ResponseEntity.ok(ApiResponse.ok("Location updated", null));
+        } catch (BadRequestException ex) {
+            log.warn("Invalid location ping request: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error updating location: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     // ── Internal / delivery-matching ──────────────────────────────────────────
@@ -189,17 +304,39 @@ public class DriverController {
             @RequestParam String cityZone,
             @RequestParam(required = false) Double radius) {
 
-        double searchRadius = (radius != null && radius > 0) ? radius : defaultSearchRadiusKm;
-        List<DriverLocation> drivers = locationService.findNearbyDrivers(
-                lat, lon, searchRadius, cityZone);
+        try {
+            if (cityZone == null || cityZone.isBlank()) {
+                throw new BadRequestException("City zone cannot be empty");
+            }
+            if (lat < -90 || lat > 90) {
+                throw new BadRequestException("Latitude must be between -90 and 90");
+            }
+            if (lon < -180 || lon > 180) {
+                throw new BadRequestException("Longitude must be between -180 and 180");
+            }
+            if (radius != null && radius <= 0) {
+                throw new BadRequestException("Radius must be greater than 0");
+            }
 
-        NearbyDriversResponse response = NearbyDriversResponse.builder()
-                .drivers(drivers)
-                .totalActive(drivers.size())
-                .cityZone(cityZone)
-                .searchRadiusKm(searchRadius)
-                .build();
+            log.debug("Searching for nearby drivers at lat={} lon={} cityZone={}", lat, lon, cityZone);
+            double searchRadius = (radius != null && radius > 0) ? radius : defaultSearchRadiusKm;
+            List<DriverLocation> drivers = locationService.findNearbyDrivers(
+                    lat, lon, searchRadius, cityZone);
 
-        return ResponseEntity.ok(ApiResponse.ok("Nearby drivers", response));
+            NearbyDriversResponse response = NearbyDriversResponse.builder()
+                    .drivers(drivers)
+                    .totalActive(drivers.size())
+                    .cityZone(cityZone)
+                    .searchRadiusKm(searchRadius)
+                    .build();
+
+            return ResponseEntity.ok(ApiResponse.ok("Nearby drivers", response));
+        } catch (BadRequestException ex) {
+            log.warn("Invalid nearby drivers request: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error fetching nearby drivers: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 }

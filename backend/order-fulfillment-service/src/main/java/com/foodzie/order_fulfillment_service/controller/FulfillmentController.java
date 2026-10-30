@@ -1,6 +1,7 @@
 package com.foodzie.order_fulfillment_service.controller;
 
-import com.foodzie.order_fulfillment_service.dto.ApiResponse;
+import com.foodzie.common.dto.ApiResponse;
+import com.foodzie.common.exceptions.*;
 import com.foodzie.order_fulfillment_service.dto.FulfillmentResponse;
 import com.foodzie.order_fulfillment_service.service.FulfillmentService;
 import lombok.RequiredArgsConstructor;
@@ -46,9 +47,26 @@ public class FulfillmentController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_RESTAURANT')")
     public ResponseEntity<ApiResponse<FulfillmentResponse>> markReady(
             @PathVariable String orderId) {
-        log.info("markReady called: orderId={}", orderId);
-        FulfillmentResponse result = fulfillmentService.markReady(orderId);
-        return ResponseEntity.ok(ApiResponse.ok("Order marked as ready for pickup", result));
+        try {
+            log.info("markReady called: orderId={}", orderId);
+            
+            // Validate input
+            if (orderId == null || orderId.isBlank()) {
+                log.warn("Order ID is null or blank");
+                throw BadRequestException.of("orderId", "Order ID is required");
+            }
+            
+            FulfillmentResponse result = fulfillmentService.markReady(orderId);
+            log.info("Order marked as ready for pickup successfully");
+            return ResponseEntity.ok(ApiResponse.ok("Order marked as ready for pickup", result));
+            
+        } catch (BadRequestException | ResourceNotFoundException e) {
+            log.warn("Error marking order as ready: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error marking order as ready", e);
+            throw new InternalServerException("Failed to mark order as ready", e);
+        }
     }
 
     /**
@@ -62,9 +80,26 @@ public class FulfillmentController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DRIVER')")
     public ResponseEntity<ApiResponse<FulfillmentResponse>> markPickedUp(
             @PathVariable String orderId) {
-        log.info("markPickedUp called: orderId={}", orderId);
-        FulfillmentResponse result = fulfillmentService.markPickedUp(orderId);
-        return ResponseEntity.ok(ApiResponse.ok("Order picked up — en route to customer", result));
+        try {
+            log.info("markPickedUp called: orderId={}", orderId);
+            
+            // Validate input
+            if (orderId == null || orderId.isBlank()) {
+                log.warn("Order ID is null or blank");
+                throw BadRequestException.of("orderId", "Order ID is required");
+            }
+            
+            FulfillmentResponse result = fulfillmentService.markPickedUp(orderId);
+            log.info("Order marked as picked up successfully");
+            return ResponseEntity.ok(ApiResponse.ok("Order picked up — en route to customer", result));
+            
+        } catch (BadRequestException | ResourceNotFoundException e) {
+            log.warn("Error marking order as picked up: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error marking order as picked up", e);
+            throw new InternalServerException("Failed to mark order as picked up", e);
+        }
     }
 
     /**
@@ -81,8 +116,25 @@ public class FulfillmentController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DRIVER')")
     public ResponseEntity<ApiResponse<FulfillmentResponse>> markDelivered(
             @PathVariable String orderId) {
-        log.info("markDelivered called: orderId={}", orderId);
-        FulfillmentResponse result = fulfillmentService.markDelivered(orderId);
-        return ResponseEntity.ok(ApiResponse.ok("Order delivered successfully", result));
+        try {
+            log.info("markDelivered called: orderId={}", orderId);
+            
+            // Validate input
+            if (orderId == null || orderId.isBlank()) {
+                log.warn("Order ID is null or blank");
+                throw BadRequestException.of("orderId", "Order ID is required");
+            }
+            
+            FulfillmentResponse result = fulfillmentService.markDelivered(orderId);
+            log.info("Order marked as delivered successfully");
+            return ResponseEntity.ok(ApiResponse.ok("Order delivered successfully", result));
+            
+        } catch (BadRequestException | ResourceNotFoundException e) {
+            log.warn("Error marking order as delivered: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error marking order as delivered", e);
+            throw new InternalServerException("Failed to mark order as delivered", e);
+        }
     }
 }

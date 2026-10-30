@@ -75,6 +75,13 @@
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
 
+		<!-- Common Exceptions Module -->
+		<dependency>
+			<groupId>com.foodzie</groupId>
+			<artifactId>common-exceptions</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
 		<!-- Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

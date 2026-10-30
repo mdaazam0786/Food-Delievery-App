@@ -1,6 +1,7 @@
 package com.foodzie.search_service.controller;
 
-import com.foodzie.search_service.dto.ApiResponse;
+import com.foodzie.common.dto.ApiResponse;
+import com.foodzie.common.exceptions.*;
 import com.foodzie.search_service.dto.PagedSearchResponse;
 import com.foodzie.search_service.service.RestaurantSearchService;
 import jakarta.validation.constraints.DecimalMax;
@@ -63,13 +64,51 @@ public class SearchController {
             @DecimalMin("0.1") @DecimalMax("50.0")     double radius,
             @RequestParam(defaultValue = "0")  @Min(0)         int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
-    ) throws IOException {
+    ) {
+        try {
+            log.debug("Nearby request: lat={} lon={} radius={}km page={} size={}",
+                    lat, lon, radius, page, size);
+            
+            // Validate input
+            if (lat == null || lon == null) {
+                log.warn("Latitude or longitude is null");
+                throw new BadRequestException("Latitude and longitude are required");
+            }
+            if (lat < -90.0 || lat > 90.0) {
+                log.warn("Invalid latitude: {}", lat);
+                throw BadRequestException.of("lat", "Latitude must be between -90 and 90");
+            }
+            if (lon < -180.0 || lon > 180.0) {
+                log.warn("Invalid longitude: {}", lon);
+                throw BadRequestException.of("lon", "Longitude must be between -180 and 180");
+            }
+            if (radius <= 0 || radius > 50) {
+                log.warn("Invalid radius: {}", radius);
+                throw BadRequestException.of("radius", "Radius must be between 0.1 and 50 km");
+            }
+            if (page < 0) {
+                log.warn("Invalid page number: {}", page);
+                throw BadRequestException.of("page", "Page number cannot be negative");
+            }
+            if (size < 1 || size > 100) {
+                log.warn("Invalid page size: {}", size);
+                throw BadRequestException.of("size", "Page size must be between 1 and 100");
+            }
 
-        log.debug("Nearby request: lat={} lon={} radius={}km page={} size={}",
-                lat, lon, radius, page, size);
-
-        PagedSearchResponse response = searchService.nearby(lat, lon, radius, page, size);
-        return ResponseEntity.ok(ApiResponse.ok("Nearby restaurants", response));
+            PagedSearchResponse response = searchService.nearby(lat, lon, radius, page, size);
+            log.debug("Nearby search completed successfully");
+            return ResponseEntity.ok(ApiResponse.ok("Nearby restaurants", response));
+            
+        } catch (BadRequestException e) {
+            log.warn("Bad request in nearby search: {}", e.getMessage());
+            throw e;
+        } catch (IOException e) {
+            log.error("IO error during nearby search", e);
+            throw new InternalServerException("Failed to search nearby restaurants", e);
+        } catch (Exception e) {
+            log.error("Unexpected error in nearby search", e);
+            throw new InternalServerException("Failed to search nearby restaurants", e);
+        }
     }
 
     /**
@@ -100,12 +139,54 @@ public class SearchController {
             @DecimalMin("0.1") @DecimalMax("50.0")                double radius,
             @RequestParam(defaultValue = "0")  @Min(0)            int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100)  int size
-    ) throws IOException {
+    ) {
+        try {
+            log.debug("Search request: q='{}' lat={} lon={} radius={}km page={} size={}",
+                    q, lat, lon, radius, page, size);
+            
+            // Validate input
+            if (q == null || q.isBlank()) {
+                log.warn("Search query is null or blank");
+                throw BadRequestException.of("q", "Search query is required");
+            }
+            if (lat == null || lon == null) {
+                log.warn("Latitude or longitude is null");
+                throw new BadRequestException("Latitude and longitude are required");
+            }
+            if (lat < -90.0 || lat > 90.0) {
+                log.warn("Invalid latitude: {}", lat);
+                throw BadRequestException.of("lat", "Latitude must be between -90 and 90");
+            }
+            if (lon < -180.0 || lon > 180.0) {
+                log.warn("Invalid longitude: {}", lon);
+                throw BadRequestException.of("lon", "Longitude must be between -180 and 180");
+            }
+            if (radius <= 0 || radius > 50) {
+                log.warn("Invalid radius: {}", radius);
+                throw BadRequestException.of("radius", "Radius must be between 0.1 and 50 km");
+            }
+            if (page < 0) {
+                log.warn("Invalid page number: {}", page);
+                throw BadRequestException.of("page", "Page number cannot be negative");
+            }
+            if (size < 1 || size > 100) {
+                log.warn("Invalid page size: {}", size);
+                throw BadRequestException.of("size", "Page size must be between 1 and 100");
+            }
 
-        log.debug("Search request: q='{}' lat={} lon={} radius={}km page={} size={}",
-                q, lat, lon, radius, page, size);
-
-        PagedSearchResponse response = searchService.search(q, lat, lon, radius, page, size);
-        return ResponseEntity.ok(ApiResponse.ok(response));
+            PagedSearchResponse response = searchService.search(q, lat, lon, radius, page, size);
+            log.debug("Search completed successfully");
+            return ResponseEntity.ok(ApiResponse.ok(response));
+            
+        } catch (BadRequestException e) {
+            log.warn("Bad request in search: {}", e.getMessage());
+            throw e;
+        } catch (IOException e) {
+            log.error("IO error during search", e);
+            throw new InternalServerException("Failed to search restaurants", e);
+        } catch (Exception e) {
+            log.error("Unexpected error in search", e);
+            throw new InternalServerException("Failed to search restaurants", e);
+        }
     }
 }

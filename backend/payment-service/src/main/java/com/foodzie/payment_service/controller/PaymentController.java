@@ -1,6 +1,7 @@
 package com.foodzie.payment_service.controller;
 
-import com.foodzie.payment_service.dto.ApiResponse;
+import com.foodzie.common.dto.ApiResponse;
+import com.foodzie.common.exceptions.*;
 import com.foodzie.payment_service.dto.InitiatePaymentRequest;
 import com.foodzie.payment_service.dto.InitiatePaymentResponse;
 import com.foodzie.payment_service.service.PaymentService;
@@ -31,9 +32,37 @@ public class PaymentController {
     public ResponseEntity<ApiResponse<InitiatePaymentResponse>> initiatePayment(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody InitiatePaymentRequest request) {
-        String userEmail = jwt.getSubject();
-        InitiatePaymentResponse response = paymentService.initiatePayment(userEmail, request);
-        return ResponseEntity.ok(ApiResponse.ok("Payment initiated", response));
+        try {
+            log.info("Payment initiation request received");
+            
+            // Validate input
+            if (jwt == null) {
+                log.warn("JWT token is null");
+                throw new UnauthorizedException("Authentication required");
+            }
+            if (request == null) {
+                log.warn("Payment request is null");
+                throw new BadRequestException("Payment request cannot be empty");
+            }
+            
+            String userEmail = jwt.getSubject();
+            
+            if (userEmail == null || userEmail.isBlank()) {
+                log.warn("User email is missing from JWT token");
+                throw new UnauthorizedException("Invalid JWT: email claim required");
+            }
+            
+            InitiatePaymentResponse response = paymentService.initiatePayment(userEmail, request);
+            log.info("Payment initiated successfully");
+            return ResponseEntity.ok(ApiResponse.ok("Payment initiated", response));
+            
+        } catch (BadRequestException | UnauthorizedException e) {
+            log.warn("Bad request during payment initiation: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error initiating payment", e);
+            throw new InternalServerException("Failed to initiate payment", e);
+        }
     }
 
     /**
@@ -46,7 +75,29 @@ public class PaymentController {
     public ResponseEntity<Void> webhook(
             @RequestBody String payload,
             @RequestHeader("X-Razorpay-Signature") String signature) {
-        paymentService.handleWebhook(payload, signature);
-        return ResponseEntity.ok().build();
+        try {
+            log.debug("Webhook received from Razorpay");
+            
+            // Validate input
+            if (payload == null || payload.isBlank()) {
+                log.warn("Webhook payload is null or blank");
+                throw new BadRequestException("Webhook payload is required");
+            }
+            if (signature == null || signature.isBlank()) {
+                log.warn("Razorpay signature is null or blank");
+                throw new BadRequestException("Razorpay signature is required");
+            }
+            
+            paymentService.handleWebhook(payload, signature);
+            log.debug("Webhook processed successfully");
+            return ResponseEntity.ok().build();
+            
+        } catch (BadRequestException e) {
+            log.warn("Bad request in webhook: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error processing webhook", e);
+            throw new InternalServerException("Failed to process webhook", e);
+        }
     }
 }

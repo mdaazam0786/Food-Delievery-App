@@ -1,18 +1,21 @@
 package com.foodzie.cart_service.controller;
 
+import com.foodzie.common.dto.ApiResponse;
+import com.foodzie.common.exceptions.*;
 import com.foodzie.cart_service.dto.AddItemRequest;
-import com.foodzie.cart_service.dto.ApiResponse;
 import com.foodzie.cart_service.dto.CartResponse;
 import com.foodzie.cart_service.dto.UpdateItemRequest;
 import com.foodzie.cart_service.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/cart")
 @RequiredArgsConstructor
@@ -28,7 +31,20 @@ public class CartController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<CartResponse>> getCart(
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(ApiResponse.ok(cartService.getCart(jwt.getSubject())));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            String userEmail = jwt.getSubject();
+            log.debug("Fetching cart for user: {}", userEmail);
+            return ResponseEntity.ok(ApiResponse.ok(cartService.getCart(userEmail)));
+        } catch (UnauthorizedException ex) {
+            log.warn("Unauthorized access: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error fetching cart: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -41,8 +57,27 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartResponse>> addItem(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody AddItemRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Item added to cart",
-                cartService.addItem(jwt.getSubject(), request)));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            if (request == null) {
+                throw new BadRequestException("Request body cannot be empty");
+            }
+            String userEmail = jwt.getSubject();
+            log.info("Adding item to cart for user: {}", userEmail);
+            return ResponseEntity.ok(ApiResponse.ok("Item added to cart",
+                    cartService.addItem(userEmail, request)));
+        } catch (BadRequestException | UnauthorizedException ex) {
+            log.warn("Invalid request: {}", ex.getMessage());
+            throw ex;
+        } catch (ConflictException ex) {
+            log.warn("Conflict adding item to cart: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error adding item to cart: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -56,8 +91,27 @@ public class CartController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable String itemId,
             @Valid @RequestBody UpdateItemRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Cart updated",
-                cartService.updateItem(jwt.getSubject(), itemId, request)));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            if (itemId == null || itemId.isBlank()) {
+                throw new BadRequestException("Item ID cannot be empty");
+            }
+            if (request == null) {
+                throw new BadRequestException("Request body cannot be empty");
+            }
+            String userEmail = jwt.getSubject();
+            log.info("Updating cart item: {} for user: {}", itemId, userEmail);
+            return ResponseEntity.ok(ApiResponse.ok("Cart updated",
+                    cartService.updateItem(userEmail, itemId, request)));
+        } catch (BadRequestException | UnauthorizedException ex) {
+            log.warn("Invalid request: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error updating cart item {}: {}", itemId, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -69,8 +123,24 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartResponse>> removeItem(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable String itemId) {
-        return ResponseEntity.ok(ApiResponse.ok("Item removed",
-                cartService.removeItem(jwt.getSubject(), itemId)));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            if (itemId == null || itemId.isBlank()) {
+                throw new BadRequestException("Item ID cannot be empty");
+            }
+            String userEmail = jwt.getSubject();
+            log.info("Removing cart item: {} for user: {}", itemId, userEmail);
+            return ResponseEntity.ok(ApiResponse.ok("Item removed",
+                    cartService.removeItem(userEmail, itemId)));
+        } catch (BadRequestException | UnauthorizedException ex) {
+            log.warn("Invalid request: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error removing cart item {}: {}", itemId, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     /**
@@ -81,7 +151,20 @@ public class CartController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> clearCart(
             @AuthenticationPrincipal Jwt jwt) {
-        cartService.clearCart(jwt.getSubject());
-        return ResponseEntity.ok(ApiResponse.ok("Cart cleared", null));
+        try {
+            if (jwt == null || jwt.getSubject() == null) {
+                throw new UnauthorizedException("Authentication token is missing or invalid");
+            }
+            String userEmail = jwt.getSubject();
+            log.info("Clearing cart for user: {}", userEmail);
+            cartService.clearCart(userEmail);
+            return ResponseEntity.ok(ApiResponse.ok("Cart cleared", null));
+        } catch (UnauthorizedException ex) {
+            log.warn("Unauthorized access: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error clearing cart: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 }

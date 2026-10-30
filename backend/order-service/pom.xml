@@ -20,6 +20,13 @@
 	</properties>
 
 	<dependencies>
+		<!-- Common Exceptions & DTOs -->
+		<dependency>
+			<groupId>com.foodzie</groupId>
+			<artifactId>common-exceptions</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
 		<!-- Web -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
