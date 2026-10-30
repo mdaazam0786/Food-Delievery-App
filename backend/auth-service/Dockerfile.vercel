@@ -1,21 +1,24 @@
 # Vercel-compatible Dockerfile for Auth Service
 # Uses lightweight alpine base with minimal layers for fast deployments
+# Note: Requires full monorepo context for building (common-exceptions dependency)
 
 FROM eclipse-temurin:21-jdk-alpine as builder
 
 WORKDIR /build
 
-# Copy pom.xml
-COPY pom.xml .
+# Install Maven
+RUN apk add --no-cache maven
 
-# Download dependencies (cache layer)
-RUN apk add --no-cache maven && \
-    mvn dependency:go-offline -B
+# Copy the entire backend directory structure to ensure common-exceptions is available
+# This assumes the build context is set from the repository root
+COPY backend ./
 
-# Copy source code
-COPY src ./src
+# Install common-exceptions module first
+WORKDIR /build/common-exceptions
+RUN mvn clean install -q
 
-# Build application
+# Build auth-service
+WORKDIR /build/auth-service
 RUN mvn clean package -DskipTests -q
 
 # Runtime stage - Alpine Linux for minimal size
@@ -24,7 +27,7 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Copy JAR from builder
-COPY --from=builder /build/target/*.jar app.jar
+COPY --from=builder /build/auth-service/target/*.jar app.jar
 
 # Health check (default port 8082, override with PORT env var)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
