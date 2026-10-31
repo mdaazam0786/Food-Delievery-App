@@ -1,5 +1,7 @@
-# Multi-stage build for API Gateway
-FROM maven:3.9-eclipse-temurin-21 as builder
+# Vercel-compatible Dockerfile for API Gateway
+# Uses lightweight alpine base with minimal layers for fast deployments
+
+FROM eclipse-temurin:21-jdk-alpine as builder
 
 WORKDIR /build
 
@@ -7,7 +9,8 @@ WORKDIR /build
 COPY pom.xml .
 
 # Download dependencies (cache layer)
-RUN mvn dependency:go-offline -B
+RUN apk add --no-cache maven && \
+    mvn dependency:go-offline -B
 
 # Copy source code
 COPY src ./src
@@ -15,7 +18,7 @@ COPY src ./src
 # Build application
 RUN mvn clean package -DskipTests -q
 
-# Runtime stage
+# Runtime stage - Alpine Linux for minimal size
 FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
@@ -23,12 +26,13 @@ WORKDIR /app
 # Copy JAR from builder
 COPY --from=builder /build/target/*.jar app.jar
 
-# Health check
+# Health check (default port 8080, override with PORT env var)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD wget -q -O - http://localhost:8080/actuator/health | grep -q UP || exit 1
 
-# Expose port
+# Expose default port (can be overridden by PORT environment variable at runtime)
 EXPOSE 8080
 
-# Run application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run application with dynamic PORT environment variable
+# The PORT env var is read from Vercel at runtime
+CMD ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8080}"]
