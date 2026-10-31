@@ -88,7 +88,7 @@ public class DriverAcceptanceService {
 
         // ── Step 2a: Update driver status IDLE → DELIVERING in MySQL ─────────
         int updated = driverRepository.updateStatusIfExpected(
-                driverId, DriverStatus.IDLE, DriverStatus.DELIVERING);
+                driverId, DriverStatus.DELIVERING);
 
         if (updated == 0) {
             // Driver is no longer IDLE (went offline, or already on a delivery).
