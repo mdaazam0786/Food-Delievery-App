@@ -86,23 +86,9 @@ public class DriverAcceptanceService {
 
         log.info("Lock acquired: orderId={} driverId={}", orderId, driverId);
 
-        // ── Step 2a: Update driver status IDLE → DELIVERING in MySQL ─────────
-        int updated = driverRepository.updateStatusIfExpected(
+        // ── Step 2a: Update driver status IDLE → DELIVERING in MongoDB ─────────
+        driverRepository.updateStatusIfExpected(
                 driverId, DriverStatus.DELIVERING);
-
-        if (updated == 0) {
-            // Driver is no longer IDLE (went offline, or already on a delivery).
-            // Release the lock so another candidate can win.
-            redisTemplate.delete(lockKey);
-            log.warn("Driver no longer IDLE at acceptance time: driverId={} orderId={} — lock released",
-                    driverId, orderId);
-            return AcceptOfferResponse.builder()
-                    .assigned(false)
-                    .orderId(orderId)
-                    .driverId(driverId)
-                    .message("You are no longer available to accept deliveries.")
-                    .build();
-        }
 
         // ── Step 2b: Cancel the offer TTL key so the timeout listener doesn't fire ──
         redisTemplate.delete(OFFER_KEY_PREFIX + orderId);
