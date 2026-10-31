@@ -1,4 +1,1 @@
-{
-  "buildCommand": "exit 0",
-  "outputDirectory": "."
-}
+{"buildCommand":"exit 0"}
