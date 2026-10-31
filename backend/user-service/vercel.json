@@ -1,0 +1,8 @@
+{
+  "buildCommand": "exit 0",
+  "outputDirectory": ".",
+  "framework": null,
+  "docker": {
+    "enabled": true
+  }
+}
