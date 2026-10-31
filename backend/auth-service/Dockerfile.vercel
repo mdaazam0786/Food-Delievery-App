@@ -44,4 +44,6 @@ EXPOSE 8082
 
 # Run application with dynamic PORT environment variable
 # The PORT env var is read from Vercel at runtime
-CMD ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8082}"]
+# Set DNS to Google's public DNS for external hostname resolution
+# Set MongoDB connection timeout to 5 seconds to avoid hanging
+CMD ["sh", "-c", "echo 'Starting auth-service on port ${PORT:-8082}...' && java -Dcom.sun.jndi.dns.servers=8.8.8.8 -Dspring.mongodb.connect-timeout=5000 -jar app.jar --server.port=${PORT:-8082}"]
