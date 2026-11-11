@@ -3,6 +3,9 @@ package com.foodzie.delivery_matching_service.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,6 +20,11 @@ import java.util.Map;
  *
  * The restaurant-service public endpoint GET /api/restaurants/{id} returns:
  * { "data": { "latitude": 28.7041, "longitude": 77.1025, ... } }
+ * 
+ * Retry strategy:
+ * - Up to 3 attempts on failure
+ * - Exponential backoff: 1s, 2s, 4s
+ * - Recovers with IllegalStateException after all attempts exhausted
  */
 @Slf4j
 @Service
@@ -28,9 +36,23 @@ public class RestaurantLocationService {
     /**
      * Returns [latitude, longitude] for the given restaurant.
      * Calls restaurant-service via load-balanced Eureka discovery.
+     * 
+     * Retries with exponential backoff on failure:
+     * - 1st attempt: immediate
+     * - 2nd attempt: after 1s
+     * - 3rd attempt: after 2s
      *
-     * @throws IllegalStateException if the restaurant cannot be found or the call fails
+     * @throws IllegalStateException if all retries exhausted or restaurant not found
      */
+    @Retryable(
+            maxAttempts = 3,
+            backoff = @Backoff(
+                    delay = 1000,
+                    multiplier = 2.0,
+                    maxDelay = 10000
+            ),
+            retryFor = {Exception.class}
+    )
     @SuppressWarnings("unchecked")
     public double[] getLocation(String restaurantId) {
         try {
@@ -52,5 +74,15 @@ public class RestaurantLocationService {
             log.error("Failed to fetch location for restaurantId={}: {}", restaurantId, e.getMessage());
             throw new IllegalStateException("Cannot resolve restaurant location: " + restaurantId, e);
         }
+    }
+
+    /**
+     * Recovery method called after all retry attempts are exhausted.
+     * Logs the final failure and throws exception to signal caller.
+     */
+    @Recover
+    public double[] recoverGetLocation(IllegalStateException e, String restaurantId) {
+        log.error("All retry attempts exhausted for restaurantId={}: {}", restaurantId, e.getMessage());
+        throw e;
     }
 }

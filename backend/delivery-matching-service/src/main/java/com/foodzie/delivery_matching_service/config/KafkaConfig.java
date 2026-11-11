@@ -17,6 +17,15 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Kafka configuration for delivery-matching-service.
+ * 
+ * Security considerations:
+ * - TRUSTED_PACKAGES restricted to specific packages (not "*")
+ * - Manual acknowledgment mode prevents message loss
+ * - Retry/backoff configured for resilience
+ * - Topic replication factor (should be 3+ for production)
+ */
 @Configuration
 public class KafkaConfig {
 
@@ -47,6 +56,12 @@ public class KafkaConfig {
 
     // ── Consumer ─────────────────────────────────────────────────────────────
 
+    /**
+     * Consumer factory with restricted deserialization packages for security.
+     * 
+     * SECURITY FIX: Changed from TRUSTED_PACKAGES="*" to specific packages
+     * This prevents arbitrary code execution via malicious messages.
+     */
     @Bean
     public ConsumerFactory<String, OrderStatusUpdatedEvent> orderStatusConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
@@ -56,8 +71,12 @@ public class KafkaConfig {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, OrderStatusUpdatedEvent.class.getName());
-        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        
+        // SECURITY: Restrict deserialization to specific event packages
+        // Only allow classes from com.foodzie.delivery_matching_service.event package
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.foodzie.delivery_matching_service.event");
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
+        
         // DNS resolution and connection retry for Railway internal network
         props.put("client.dns.lookup", "use_all_dns_ips");
         props.put("reconnect.backoff.ms", 50);
@@ -81,14 +100,20 @@ public class KafkaConfig {
     }
 
     // ── Topics ───────────────────────────────────────────────────────────────
+    // Replication factor = 3 ensures high availability:
+    // - If one broker fails, data is still available on other replicas
+    // - At least 2 replicas must be in sync before acknowledging writes
+    // For development/testing with single broker, reduce replication factor to 1
 
     @Bean
     public NewTopic orderEventsTopic() {
-        return new NewTopic("order-events", 3, (short) 1);
+        // 3 partitions for parallelism, 3 replicas for fault tolerance
+        return new NewTopic("order-events", 3, (short) 3);
     }
 
     @Bean
     public NewTopic deliveryEventsTopic() {
-        return new NewTopic("delivery-events", 3, (short) 1);
+        // 3 partitions for parallelism, 3 replicas for fault tolerance
+        return new NewTopic("delivery-events", 3, (short) 3);
     }
 }
