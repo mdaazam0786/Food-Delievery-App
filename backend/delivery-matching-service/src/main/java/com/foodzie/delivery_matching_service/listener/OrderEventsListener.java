@@ -6,7 +6,6 @@ import com.foodzie.delivery_matching_service.service.RestaurantLocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.rebalance.ConsumerAware;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -48,15 +47,16 @@ public class OrderEventsListener {
     )
     public void onOrderEvent(
             @Payload OrderStatusUpdatedEvent event,
-            @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
-            @Header(KafkaHeaders.OFFSET) long offset,
+            @Header(name = KafkaHeaders.RECEIVED_PARTITION_ID, required = false) Integer partition,
+            @Header(name = KafkaHeaders.OFFSET, required = false) Long offset,
             Acknowledgment ack) {
         
         try {
             if (event == null || event.getPayload() == null) {
                 log.warn("Received null or malformed OrderStatusUpdatedEvent at partition={} offset={} — skipping",
-                        partition, offset);
-                ack.acknowledge();  // Acknowledge to avoid reprocessing malformed messages
+                        partition != null ? partition : "unknown", 
+                        offset != null ? offset : "unknown");
+                if (ack != null) ack.acknowledge();  // Acknowledge to avoid reprocessing malformed messages
                 return;
             }
 
@@ -64,7 +64,7 @@ public class OrderEventsListener {
             if (!"ACCEPTED".equals(event.getPayload().getNewStatus())) {
                 log.debug("Order status not ACCEPTED, skipping: status={}", 
                         event.getPayload().getNewStatus());
-                ack.acknowledge();  // Acknowledge non-target events
+                if (ack != null) ack.acknowledge();  // Acknowledge non-target events
                 return;
             }
 
@@ -72,7 +72,9 @@ public class OrderEventsListener {
             String restaurantId = event.getPayload().getRestaurantId();
 
             log.info("Order ACCEPTED — starting driver matching: orderId={} restaurantId={} partition={} offset={}",
-                    orderId, restaurantId, partition, offset);
+                    orderId, restaurantId, 
+                    partition != null ? partition : "unknown", 
+                    offset != null ? offset : "unknown");
 
             // Fetch restaurant coordinates from restaurant-service (with retry)
             double[] location;
@@ -82,7 +84,7 @@ public class OrderEventsListener {
                 log.error("Cannot start matching for orderId={} — restaurant location unavailable after retries: {}",
                         orderId, e.getMessage());
                 // Negative acknowledge with 5s delay for retry
-                ack.nack(5000);
+                if (ack != null) ack.nack(5000);
                 return;
             }
 
@@ -103,15 +105,17 @@ public class OrderEventsListener {
                     orderId, restaurantId, restaurantLat, restaurantLon, cityZone, itemCount);
             
             // Explicit acknowledgment on successful processing
-            ack.acknowledge();
+            if (ack != null) ack.acknowledge();
             log.debug("Order event processed and acknowledged: orderId={}", orderId);
 
         } catch (Exception e) {
             log.error("Unexpected error processing order event at partition={} offset={}: {}",
-                    partition, offset, e.getMessage(), e);
+                    partition != null ? partition : "unknown", 
+                    offset != null ? offset : "unknown", 
+                    e.getMessage(), e);
             // Negative acknowledge with 5s delay for retry
             try {
-                ack.nack(5000);
+                if (ack != null) ack.nack(5000);
             } catch (Exception nackException) {
                 log.error("Failed to nack message: {}", nackException.getMessage());
             }
