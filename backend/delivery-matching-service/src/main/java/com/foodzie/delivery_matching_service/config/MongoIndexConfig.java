@@ -44,28 +44,28 @@ public class MongoIndexConfig {
             // This index covers: _id IN (...) AND currentStatus = IDLE AND kycStatus = APPROVED
             mongoTemplate.indexOps(DeliveryPartner.class)
                     .ensureIndex(new Index()
-                            .on("_id", 1)
-                            .on("currentStatus", 1)
-                            .on("kycStatus", 1));
+                            .on("_id", org.springframework.data.domain.Sort.Direction.ASC)
+                            .on("currentStatus", org.springframework.data.domain.Sort.Direction.ASC)
+                            .on("kycStatus", org.springframework.data.domain.Sort.Direction.ASC));
             log.info("✓ Created composite index on _id, currentStatus, kycStatus");
 
             // Index for filtering by status and KYC only (useful for admin queries)
             mongoTemplate.indexOps(DeliveryPartner.class)
                     .ensureIndex(new Index()
-                            .on("currentStatus", 1)
-                            .on("kycStatus", 1));
+                            .on("currentStatus", org.springframework.data.domain.Sort.Direction.ASC)
+                            .on("kycStatus", org.springframework.data.domain.Sort.Direction.ASC));
             log.info("✓ Created index on currentStatus, kycStatus");
 
             // Index for driver status queries (driver status changes frequently)
             mongoTemplate.indexOps(DeliveryPartner.class)
                     .ensureIndex(new Index()
-                            .on("currentStatus", 1));
+                            .on("currentStatus", org.springframework.data.domain.Sort.Direction.ASC));
             log.info("✓ Created index on currentStatus");
 
             // Index for KYC status queries (useful for compliance/audit)
             mongoTemplate.indexOps(DeliveryPartner.class)
                     .ensureIndex(new Index()
-                            .on("kycStatus", 1));
+                            .on("kycStatus", org.springframework.data.domain.Sort.Direction.ASC));
             log.info("✓ Created index on kycStatus");
 
             log.info("MongoDB index initialization completed successfully");

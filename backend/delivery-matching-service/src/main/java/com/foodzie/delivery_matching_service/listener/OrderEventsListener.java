@@ -47,8 +47,8 @@ public class OrderEventsListener {
     )
     public void onOrderEvent(
             @Payload OrderStatusUpdatedEvent event,
-            @Header(name = KafkaHeaders.RECEIVED_PARTITION_ID, required = false) Integer partition,
-            @Header(name = KafkaHeaders.OFFSET, required = false) Long offset,
+            @Header(name = "kafka_receivedPartitionId", required = false) Integer partition,
+            @Header(name = "kafka_offset", required = false) Long offset,
             Acknowledgment ack) {
         
         try {
@@ -84,7 +84,7 @@ public class OrderEventsListener {
                 log.error("Cannot start matching for orderId={} — restaurant location unavailable after retries: {}",
                         orderId, e.getMessage());
                 // Negative acknowledge with 5s delay for retry
-                if (ack != null) ack.nack(5000);
+                if (ack != null) ack.nack(java.time.Duration.ofSeconds(5));
                 return;
             }
 
@@ -115,7 +115,7 @@ public class OrderEventsListener {
                     e.getMessage(), e);
             // Negative acknowledge with 5s delay for retry
             try {
-                if (ack != null) ack.nack(5000);
+                if (ack != null) ack.nack(java.time.Duration.ofSeconds(5));
             } catch (Exception nackException) {
                 log.error("Failed to nack message: {}", nackException.getMessage());
             }
