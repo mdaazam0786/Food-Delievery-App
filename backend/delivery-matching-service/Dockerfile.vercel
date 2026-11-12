@@ -18,26 +18,23 @@ COPY --from=builder /build/target/*.jar app.jar
 # - Xmx: Maximum heap size (set to 512MB to prevent OOM under load)
 # - XX:+UseG1GC: Use G1 garbage collector (better for containers)
 # - XX:MaxGCPauseMillis: Limit GC pauses to 200ms (good for real-time systems)
-# 
-# For Kubernetes/Docker with container limits:
-# - Set -Xmx to 75-80% of container memory limit
-# - Example: 512MB container → -Xmx384m
-# - Example: 1GB container → -Xmx768m
-#
-# Memory overhead (~100-150MB):
-# - JVM internals, non-heap memory, thread stacks
-# - Total expected usage: 512MB Xmx + 150MB overhead = ~650MB
+# - Djava.security.auth.login.config: Enable JAAS for Kafka SASL authentication
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
-  CMD wget -q -O - http://localhost:8092/actuator/health | grep -q UP || exit 1
+  CMD wget -q -O - http://localhost:${PORT:-8092}/actuator/health | grep -q UP || exit 1
 
 EXPOSE 8092
 
-ENTRYPOINT ["java", \
-  "-Xms256m", \
-  "-Xmx512m", \
-  "-XX:+UseG1GC", \
-  "-XX:MaxGCPauseMillis=200", \
-  "-XX:+UnlockDiagnosticVMOptions", \
-  "-XX:G1SummarizeRSetStatsPeriod=1", \
-  "-jar", "app.jar"]
+# Start the application with dynamic PORT support
+CMD java \
+  -Xms256m \
+  -Xmx512m \
+  -XX:+UseG1GC \
+  -XX:MaxGCPauseMillis=200 \
+  -XX:+UnlockDiagnosticVMOptions \
+  -XX:G1SummarizeRSetStatsPeriod=1 \
+  -Dcom.sun.jndi.dns.servers=8.8.8.8 \
+  -Djava.security.auth.login.config=/dev/null \
+  -Dspring.profiles.active=cloud \
+  -jar app.jar \
+  --server.port=${PORT:-8092}
