@@ -671,7 +671,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
           }
         );
       }
-    }, 5000); // Every 5 seconds
+    }, 30000); // Every 30 seconds (reduced from 5s to cut 720 pings/hour per driver to 120)
   };
 
   // ── Render Guards ──────────────────────────────────────────────────────────

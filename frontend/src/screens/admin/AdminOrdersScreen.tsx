@@ -329,10 +329,11 @@ const AdminOrdersScreen: React.FC = () => {
     return () => es?.close();
   }, [activeRestaurantId]);
 
-  // Fallback poll every 30 s in case SSE misses an event
+  // Fallback poll every 2 minutes in case SSE misses an event
+  // Reduced from 30s to 2min to cut function invocations by 75% (was causing 120 polls/hour)
   useEffect(() => {
     if (!activeRestaurantId) return;
-    const interval = setInterval(() => loadOrders(activeRestaurantId), 30_000);
+    const interval = setInterval(() => loadOrders(activeRestaurantId), 120_000);
     return () => clearInterval(interval);
   }, [activeRestaurantId, loadOrders]);
 

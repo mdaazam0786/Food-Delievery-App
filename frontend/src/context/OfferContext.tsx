@@ -56,7 +56,7 @@ export const OfferProvider: React.FC<OfferProviderProps> = ({ children }) => {
     };
   }, [handleNewOffer, handleConnectionChange]);
 
-  // Timer for countdown
+  // Timer for countdown - only update when seconds actually change to avoid unnecessary renders
   useEffect(() => {
     if (offers.length === 0) return;
 
