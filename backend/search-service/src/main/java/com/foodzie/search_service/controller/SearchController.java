@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-
 /**
  * Public search endpoints consumed by the React Native app.
  *
@@ -102,9 +100,6 @@ public class SearchController {
         } catch (BadRequestException e) {
             log.warn("Bad request in nearby search: {}", e.getMessage());
             throw e;
-        } catch (IOException e) {
-            log.error("IO error during nearby search", e);
-            throw new InternalServerException("Failed to search nearby restaurants", e);
         } catch (Exception e) {
             log.error("Unexpected error in nearby search", e);
             throw new InternalServerException("Failed to search nearby restaurants", e);
@@ -181,9 +176,6 @@ public class SearchController {
         } catch (BadRequestException e) {
             log.warn("Bad request in search: {}", e.getMessage());
             throw e;
-        } catch (IOException e) {
-            log.error("IO error during search", e);
-            throw new InternalServerException("Failed to search restaurants", e);
         } catch (Exception e) {
             log.error("Unexpected error in search", e);
             throw new InternalServerException("Failed to search restaurants", e);
