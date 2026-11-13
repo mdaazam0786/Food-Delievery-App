@@ -1,7 +1,6 @@
 package com.foodzie.location_update_service.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +9,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +27,7 @@ import java.util.Map;
  *   AckMode = BATCH            — Commits offsets after the full batch is flushed
  *                                to Redis, not after each individual message
  */
+@Slf4j
 @Configuration
 public class KafkaConfig {
 
@@ -44,6 +45,13 @@ public class KafkaConfig {
 
     @Bean
     public ConsumerFactory<String, String> locationPingConsumerFactory() {
+        log.info("Creating Kafka consumer with bootstrap servers: {}", bootstrapServers);
+        
+        if (bootstrapServers == null || bootstrapServers.isEmpty()) {
+            throw new IllegalArgumentException("spring.kafka.bootstrap-servers is not configured. " +
+                    "Please set KAFKA_BOOTSTRAP_SERVERS environment variable or configure spring.kafka.bootstrap-servers");
+        }
+        
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -75,10 +83,5 @@ public class KafkaConfig {
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.BATCH);
         factory.setConcurrency(1);
         return factory;
-    }
-
-    @Bean
-    public NewTopic locationPingsTopic() {
-        return new NewTopic("driver-location-pings", 3, (short) 1);
     }
 }
