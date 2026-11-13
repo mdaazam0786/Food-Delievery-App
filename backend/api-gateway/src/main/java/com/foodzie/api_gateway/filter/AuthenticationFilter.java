@@ -55,8 +55,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     // Forward useful claims as headers to downstream services
                     Claims claims = jwtUtil.extractAllClaims(token);
                     
-                    // Log the incoming request for debugging
-                    log.info("🔐 AuthenticationFilter: path={} method={} user={}",
+                    // Debug logging only — reduces I/O overhead on every authenticated request
+                    log.debug("✓ AuthenticationFilter: path={} method={} user={}",
                             request.getURI().getPath(), request.getMethod(), claims.getSubject());
                     
                     // Extract roles - handle both "role" (string) and "roles" (array) formats

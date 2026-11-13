@@ -16,12 +16,18 @@ public class JwtUtil {
     @Value("${app.jwt.secret}")
     private String secret;
 
+    private Key cachedSigningKey;
+
     /**
-     * Builds the signing key from the Base64-encoded secret in application.properties.
+     * Builds and caches the signing key from the Base64-encoded secret in application.properties.
+     * Caching prevents repeated Base64 decoding on every token validation.
      */
     private Key getSigningKey() {
-        byte[] keyBytes = Base64.getDecoder().decode(secret);
-        return Keys.hmacShaKeyFor(keyBytes);
+        if (cachedSigningKey == null) {
+            byte[] keyBytes = Base64.getDecoder().decode(secret);
+            cachedSigningKey = Keys.hmacShaKeyFor(keyBytes);
+        }
+        return cachedSigningKey;
     }
 
     /**
